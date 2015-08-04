@@ -8,7 +8,7 @@
         <field name="inherit_id" ref="account.invoice_form" />
         <field name="arch" type="xml">
             <button name="invoice_print" position="after">
-                <button name="action_fiscal_printer" string="Print" type="object" attrs="{'invisible':['|',('sent','=',True), ('state', '!=', 'open')]}" class="oe_highlight" groups="base.group_user"/>
+                <button name="action_fiscal_printer" string="Fiscal Print" type="object" attrs="{'invisible':['|',('sent','=',True), ('state', '!=', 'open')]}" class="oe_highlight" groups="base.group_user"/>
             </button>
             <field name="sent" position="after">
                 <group>

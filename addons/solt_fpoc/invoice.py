@@ -98,9 +98,9 @@ class fpoc_invoice(osv.osv):
                         "address": inv.partner_id.street,
                         "address_2": inv.partner_id.city,
                         "address_3": inv.partner_id.country_id.name,
-                        "document_type": document_type_map.get(inv.partner_id.document_type_id.code, "D"),
-                        "document_number": inv.partner_id.document_number,
-                        "responsability": responsability_map.get(inv.partner_id.responsability_id.code, "F"),
+                        "document_type": "D",#document_type_map.get(inv.partner_id.document_type_id.code, "D"),
+                        "document_number": '000000000', #inv.partner_id.document_number,
+                        "responsability": "F",#responsability_map.get(inv.partner_id.responsability_id.code, "F"),
                     },
                     "related_document": (picking_obj.search_read(cr, uid, [('origin','=',inv.origin)], ["name"]) +
                                          [{'name': _("No picking")}])[0]['name'],
