@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+    
+    <record id="view_account_invoice_fop_form" model="ir.ui.view">
+        <field name="model">account.invoice</field>
+        <field name="name">account.invoice.fpoc.form</field>
+        <field name="inherit_id" ref="account.invoice_form" />
+        <field name="arch" type="xml">
+            <button name="invoice_print" position="after">
+                <button name="action_fiscal_printer" string="Print" type="object" attrs="{'invisible':['|',('sent','=',True), ('state', '!=', 'open')]}" class="oe_highlight" groups="base.group_user"/>
+            </button>
+            <field name="sent" position="after">
+                <group>
+                    <field name='use_fiscal_printer'/>
+                </group>
+            </field>
+            <notebook position="inside">
+                <page string="Fiscal Printer" position="inside" attrs="{'invisible': [('use_fiscal_printer','=',False)]}">
+                    <group colspan="2" col="2">
+                    <field name='fiscal_printer_id'/>
+                    <field name='fiscal_printer_configuration_id'/>
+                    <field name='fiscal_printer_anon_partner_id'/>
+                    <field name='fiscal_printer_state'/>
+                    <field name='fiscal_printer_fiscal_state'/>
+                    <field name='fiscal_printer_paper_state'/>
+                    <field name='fiscal_printer_items_generated'/>
+                    </group>
+                </page>
+            </notebook>
+        </field>
+    </record>
+    
+  </data>
+</openerp>
+<!-- vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4
+     -->
