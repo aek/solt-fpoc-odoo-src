@@ -39,9 +39,6 @@ class fiscal_printer_disconnected(osv.TransientModel):
 
     _columns = {
         'name': fields.char(string='Name'),
-        'protocol': fields.char(string='Protocol'),
-        'model': fields.char(string='Model'),
-        'serialNumber': fields.char(string='Serial Number'),
         'session_id': fields.char(string='Session'),
         'user_id': fields.many2one('res.users', string='Responsable'),
     }
@@ -65,9 +62,6 @@ class fiscal_printer_disconnected(osv.TransientModel):
                 else:
                     values = {
                         'name': p['name'],
-                        'protocol': p['protocol'],
-                        'model': p['model'],
-                        'serialNumber': p['serialNumber'],
                         'session_id': p['sid'],
                         'user_id': p['uid'],
                     }
@@ -89,9 +83,7 @@ class fiscal_printer_disconnected(osv.TransientModel):
         for pri in self.browse(cr, uid, ids):
             values = {
                 'name': pri.name,
-                'protocol': pri.protocol,
-                'model': pri.model,
-                'serialNumber': pri.serialNumber,
+                'session_id': pri.session_id,
             }
             fp_obj.create(cr, uid, values)
         return {
@@ -118,15 +110,12 @@ class fiscal_printer(osv.osv):
         r = {}
         for p_id in ids:
             if s[p_id]:
-                dt = datetime.strptime(s[p_id]['clock'], "%Y-%m-%d %H:%M:%S")
                 r[p_id] = {
-                    'clock': dt.strftime("%Y-%m-%d %H:%M:%S"),
                     'printerStatus': s[p_id].get('strPrinterStatus', 'Unknown'),
                     'fiscalStatus': s[p_id].get('strFiscalStatus', 'Unknown'),
                 }
             else:
                 r[p_id]= {
-                    'clock':False,
                     'printerStatus':'Offline',
                     'fiscalStatus': 'Offline',
                 }
@@ -137,13 +126,9 @@ class fiscal_printer(osv.osv):
 
     _columns = {
         'name': fields.char(string='Name', required=True),
-        'protocol': fields.char(string='Protocol'),
-        'model': fields.char(string='Model'),
-        'serialNumber': fields.char(string='Serial Number (S/N)'),
         'lastUpdate': fields.datetime(string='Last Update'),
         'printerStatus': fields.function(_get_status, type="char", method=True, readonly="True", multi="state", string='Printer status'),
         'fiscalStatus':  fields.function(_get_status, type="char", method=True, readonly="True", multi="state", string='Fiscal status'),
-        'clock':         fields.function(_get_status, type="datetime", method=True, readonly="True", multi="state", string='Clock'),
         'session_id': fields.char(string='session_id'),
     }
 
@@ -155,58 +140,31 @@ class fiscal_printer(osv.osv):
 
     _sql_constraints = [ ('model_serialNumber_unique', 'unique("model", "serialNumber")', 'this printer with this model and serial number yet exists') ]
 
-    def update_printers(self, cr, uid, ids, context=None):
-        r = do_event('info', {})
-        return True
-
     def short_test(self, cr, uid, ids, context=None):
         for fp in self.browse(cr, uid, ids):
-            do_event('short_test', {'name': fp.name},
-                     session_id=fp.session_id, printer_id=fp.name)
+            lines = [
+                '80$TEST RECEIPT',
+                '800-------------------------------------',
+                '800REFERENCIA: REC-443',
+                '800CLIENTE: 5 MANUEL SALVADOR RIOVALLE',
+                '80*TOTAL      B/. 75.00',
+                '80*Efectivo   B/. 80.00',
+                '80*CAMBIO     B/. 5.00',
+                '800-------------------------------------',
+                '800VENDEDOR: ADMINISTRADOR ADMIN',
+                '810',
+            ]
+            do_event('make_ticket', {'name': fp.name, 'lines': lines}, session_id=fp.session_id, printer_id=fp.name)
         return True
 
-    def large_test(self, cr, uid, ids, context=None):
+    def report_x(self, cr, uid, ids, context=None):
         for fp in self.browse(cr, uid, ids):
-            do_event('large_test', {'name': fp.name},
-                     session_id=fp.session_id, printer_id=fp.name)
+            do_event('make_report', {'name': fp.name, 'type': 'I0X'}, session_id=fp.session_id, printer_id=fp.name)
         return True
 
-    def advance_paper(self, cr, uid, ids, context=None):
+    def report_z(self, cr, uid, ids, context=None):
         for fp in self.browse(cr, uid, ids):
-            do_event('advance_paper', {'name': fp.name},
-                     session_id=fp.session_id, printer_id=fp.name)
-        return True
-        
-    def cut_paper(self, cr, uid, ids, context=None):
-        for fp in self.browse(cr, uid, ids):
-            do_event('cut_paper', {'name': fp.name},
-                     session_id=fp.session_id, printer_id=fp.name)
-        return True
-        
-    def open_fiscal_journal(self, cr, uid, ids, context=None):
-        for fp in self.browse(cr, uid, ids):
-            do_event('open_fiscal_journal', {'name': fp.name},
-                     session_id=fp.session_id, printer_id=fp.name)
-        return True
-
-    def cancel_fiscal_ticket(self, cr, uid, ids, context=None):
-        r = {}
-        for fp in self.browse(cr, uid, ids):
-            event_result = do_event('cancel_fiscal_ticket', {'name': fp.name},
-                                    session_id=fp.session_id, printer_id=fp.name)
-            r[fp.id] = event_result.pop() if event_result else False
-        return r
-
-    def close_fiscal_journal(self, cr, uid, ids, context=None):
-        for fp in self.browse(cr, uid, ids):
-            do_event('close_fiscal_journal', {'name': fp.name},
-                     session_id=fp.session_id, printer_id=fp.name)
-        return True
-
-    def shift_change(self, cr, uid, ids, context=None):
-        for fp in self.browse(cr, uid, ids):
-            do_event('shift_change', {'name': fp.name},
-                     session_id=fp.session_id, printer_id=fp.name)
+            do_event('make_report', {'name': fp.name, 'type': 'I0Z'}, session_id=fp.session_id, printer_id=fp.name)
         return True
 
     def get_state(self, cr, uid, ids, context=None):
@@ -220,23 +178,33 @@ class fiscal_printer(osv.osv):
             r[fp.id] = event_result.pop() if event_result else False
         return r
 
-    def get_counters(self, cr, uid, ids, context=None):
-        r = {}
-        for fp in self.browse(cr, uid, ids):
-            event_result = do_event('get_counters', {'name': fp.name},
-                     session_id=fp.session_id, printer_id=fp.name)
-            r[fp.id] = event_result.pop() if event_result else False
-        return r
-
     def make_fiscal_ticket(self, cr, uid, ids, options={}, ticket={}, context=None):
         fparms = {}
         r = {}
         for fp in self.browse(cr, uid, ids):
+            lines = [
+                'jSNOMBRE RAZON SOCIAL', 
+                'jRRUC_CEDULA', 
+                'j3LINEA 3 telefono o Celular o Direccion',
+                'j4LINEA 4 telefono o Celular o Direccion',
+                'j5LINEA 5 telefono o Celular o Direccion',
+                'j6LINEA 6 telefono o Celular o Direccion',
+                '@COMENTARIO',
+                '!00000010000850000001000CHRISTIE`S 3825T/3826T TITANI+ME690',
+                'p-2000',
+                '!000000880000001000PROG. GENERICO',
+                'p-2000',
+                '!000000880000001000PROG. GENERICO',
+                'p-2000',
+                '@prueba de comentarios para que se muestr',
+                '@ en la fiscal',
+                '@  ***GARANTIA***',
+                '101'
+            ]
             fparms['name'] = fp.name
             fparms['options'] = options
             fparms['ticket'] = ticket
-            event_result = do_event('make_fiscal_ticket', fparms,
-                                    session_id=fp.session_id, printer_id=fp.name)
+            event_result = do_event('make_ticket', fparms, session_id=fp.session_id, printer_id=fp.name)
             r[fp.id] = event_result.pop() if event_result else False
         return r
 

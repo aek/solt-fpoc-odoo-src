@@ -123,11 +123,12 @@ def do_event(event, data={}, session_id=None, printer_id=None, control=False):
     # Select target of queue. Control go to Chrome Application, else take printers.
     # All control queue end with ':'.
     if control:
-        qids = [ session_id ] if session_id else [ qid for qid in event_hub.keys() if qid[-1] == ':']
+        qids = [ session_id ] if session_id else [ qid for qid in event_hub.keys()]
     else:
         qid = ':'.join([session_id or '', printer_id or ''])
         qids = [ qid ] if qid != ':' else event_hub.keys()
-        qids = [ qid for qid in qids if qid in event_hub.keys() and qid[-1] != ':' ]
+        #qids = event_hub.keys()
+        qids = [ qid for qid in qids if qid in event_hub.keys()]
 
     _logger.debug("Send message '%s' to spools: %s" % (event, qids))
 
@@ -135,7 +136,7 @@ def do_event(event, data={}, session_id=None, printer_id=None, control=False):
         event_event[event_id] = threading.Event()
         event_result[event_id] = None
         event_hub[qid].put(item)
-        w = event_event[event_id].wait(60)
+        w = event_event[event_id].wait(10)
         if not w: raise osv.except_osv(_('Error!'), _('Timeout happen!!'))
         _logger.debug("Return '%s': %s" % (qids, w))
         result[qid] = event_result[event_id]

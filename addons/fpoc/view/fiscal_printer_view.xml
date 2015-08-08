@@ -8,8 +8,6 @@
             <field name="arch" type="xml">
                 <tree string="Disconnected Fiscal Printer" create="false" edit="false">
                     <field name="name"/>
-                    <field name="protocol"/>
-                    <field name="model"/>
                     <field name="user_id"/>
                     <field name="session_id"/>
                     <button type="object" name="create_fiscal_printer" string="Create"
@@ -25,8 +23,7 @@
             <field name="arch" type="xml">
                 <search string="Fiscal Printer" version="7.0">
                     <group string="By Attribute">
-                    <field name="name" string="Name"
-                            />
+                    <field name="name" string="Name"/>
                     </group>
                     <group string="By object">
                     </group>
@@ -45,16 +42,12 @@
                     <sheet string="fiscal_printer">
                      <group>
                         <field name="name" />
-                        <field name="protocol" />
-                        <field name="model" />
-                        <field name="serialNumber" />
                         <field name="lastUpdate"/>
                         <field name="session_id"/>
                      </group>
                         <notebook>
                             <page string="Status">
                                 <group>
-                                <field name="clock" widget="datetime"/>
                                 <field name="printerStatus" />
                                 <field name="fiscalStatus" />
                                 </group>
@@ -63,16 +56,10 @@
                             </page>
                             <page string="Actions">
                                 <separator string="Test"/>
-                                <button name="short_test"           type="object" string="Short Test"/>
-                                <button name="large_test"           type="object" string="Large Test"/>
-                                <separator string="Paper management"/>
-                                <button name="advance_paper"        type="object" string="Advance paper"/>
-                                <button name="cut_paper"            type="object" string="Cut paper"/>
+                                <button name="short_test" type="object" string="Test"/>
                                 <separator string="Fiscal Management"/>
-                                <button name="open_fiscal_journal"  type="object" string="Open Fiscal Journal"/>
-                                <button name="cancel_fiscal_ticket" type="object" string="Cancel Ticket"/>
-                                <button name="shift_change"         type="object" string="Shift Change"/>
-                                <button name="close_fiscal_journal" type="object" string="Close Fiscal Journal"/>
+                                <button name="report_x" type="object" string="Report X"/>
+                                <button name="report_z" type="object" string="Report Z"/>
                             </page>
                         </notebook>
                     </sheet>
@@ -85,18 +72,9 @@
             <field name="name">fpoc.fpoc.tree</field>
             <field name="model">fpoc.fiscal_printer</field>
             <field name="arch" type="xml">
-                <tree string="Fiscal Printer"
-                    >
-                    <field name="name"
-                        />
-                    <field name="protocol"
-                        />
-                    <field name="model"
-                        />
-                    <field name="serialNumber"
-                        />
-                    <field name="lastUpdate"
-                        />
+                <tree string="Fiscal Printer">
+                    <field name="name"/>
+                    <field name="lastUpdate"/>
                 </tree>
             </field>
         </record>
@@ -127,63 +105,6 @@
                         <field name="protocol" invisible="1"/>
                      </group>
                 </form>
-            </field>
-        </record>
-
-        <!-- FORMVIEW -->
-        <record id="fpoc.view_fiscal_printer_epson_form" model="ir.ui.view">
-            <field name="name">fpoc.epson.form</field>
-            <field name="model">fpoc.fiscal_printer</field>
-            <field name="inherit_id" ref="fpoc.view_fiscal_printer_fiscal_printer_form"/>
-            <field name="arch" type="xml">
-                <page string="Attributes" position="inside">
-                    <group attrs="{'invisible': [('protocol','!=','epson_ar')]}" string="Datos Fijos">
-                        <field name="header"/>
-                        <field name="footer"/>
-                    </group>
-                    <group attrs="{'invisible': [('protocol','!=','epson_ar')]}" string="Datos del Contribuyentes">
-                        <field name="razonSocial"/>
-                        <field name="cuit"/>
-                        <field name="caja"/>
-                        <field name="ivaResponsabilidad"/>
-                        <field name="calle"/>
-                        <field name="numero"/>
-                        <field name="depto"/>
-                        <field name="localidad"/>
-                        <field name="cpa"/>
-                        <field name="provincia"/>
-                        <field name="tasaIVA"/>
-                        <field name="maxMonto"/>
-                        <field name="fechaFiscalizacion"/>
-                    </group>
-                </page>
-            </field>
-        </record>
-
-        <!-- FORMVIEW -->
-        <record id="view_fiscal_printer_epson_ar_fiscal_tf_form" model="ir.ui.view">
-            <field name="name">fpoc.epson_ar_fiscal_tf.form</field>
-            <field name="model">fpoc.configuration</field>
-            <field name="inherit_id" ref="view_fiscal_printer_configuration_form"/>
-            <field name="arch" type="xml">
-                        <group id="main" position="after">
-                            <group attrs="{'invisible': [('type','!=','epson_ar_tf')]}" string="Configuracion">
-                                <group string="Apertura de Ticket">
-                                <field name="triplicated"/>
-                                <field name="store_description"/>
-                                <field name="keep_description_attributes"/>
-                                <field name="store_extra_description"/>
-                                </group>
-                                <group string="Cierre de Ticket">
-                                <field name="cut_paper"/>
-                                <field name="electronic_answer"/>
-                                <field name="print_return_attribute"/>
-                                <field name="current_account_automatic_pay"/>
-                                <field name="print_quantities"/>
-                                <field name="tail"/>
-                                </group>
-                            </group>
-                        </group>
             </field>
         </record>
 
