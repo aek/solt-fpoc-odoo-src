@@ -90,7 +90,7 @@ def connection_dropped(self, error, environ=None):
         qid = "%s:%s" % (sid, pid)
         if qid in event_hub:
             del event_hub[qid]
-            _logger.debug(u"Removing spools %s by %s" % (qid, str(error).decode('utf8')))
+            _logger.info(u"Removing spools %s by %s" % (qid, str(error).decode('utf8')))
         else:
             _logger.warning(u"Removing spools %s by %s, but it not was stored." % (qid, str(error).decode('utf8')))
 
@@ -130,19 +130,19 @@ def do_event(event, data={}, session_id=None, printer_id=None, control=False):
         #qids = event_hub.keys()
         qids = [ qid for qid in qids if qid in event_hub.keys()]
 
-    _logger.debug("Send message '%s' to spools: %s" % (event, qids))
+    _logger.info("Send message '%s' to spools: %s" % (event, qids))
 
     for qid in qids:
         event_event[event_id] = threading.Event()
         event_result[event_id] = None
         event_hub[qid].put(item)
-        w = event_event[event_id].wait(10)
+        w = event_event[event_id].wait(60)
         if not w: raise osv.except_osv(_('Error!'), _('Timeout happen!!'))
-        _logger.debug("Return '%s': %s" % (qids, w))
+        _logger.info("Return '%s': %s" % (qids, w))
         result[qid] = event_result[event_id]
         event_hub[qid].task_done()
 
-    _logger.debug("Result from '%s' was: %s" % (qids, result))
+    _logger.info("Result from '%s' was: %s" % (qids, result))
 
     return [ result[qid] for qid in qids if qid in result ]
 
@@ -157,7 +157,7 @@ def do_return(req, result):
     qid = ':'.join([sid, pid])
 
     if qid not in event_hub:
-        _logger.debug("<<< Drop message: %s" % result)
+        _logger.info("<<< Drop message: %s" % result)
         return False
 
     this_event_id = int(result['event_id'])
@@ -185,7 +185,7 @@ class FiscalPrinterController(oeweb.Controller):
         return do_return(req, kw)
 
     def on_close_spool(self, **kw):
-        _logger.debug("Closing spool %s" % self.qid)
+        _logger.info("Closing spool %s" % self.qid)
         return
 
     @oeweb.httprequest
@@ -199,12 +199,12 @@ class FiscalPrinterController(oeweb.Controller):
         self.qid = qid
 
         if (qid in event_hub):
-            _logger.debug("Close connection spool %s by duplication." % qid)
+            _logger.info("Close connection spool %s by duplication." % qid)
             return req.make_response('\n\nevent: close\n\n\n\n',
                                  [('cache-control', 'no-cache'),
                                   ('Content-Type', 'text/event-stream')])
 
-        _logger.debug("Open new connection spool: %s" % qid)
+        _logger.info("Open new connection spool: %s" % qid)
 
         event_hub[qid] = Queue()
 
@@ -232,7 +232,7 @@ class FiscalPrinterController(oeweb.Controller):
         while True:
             try:
                 message = event_hub[qid].get(timeout=timeout)
-                _logger.debug("Send message %s to %s" % (message['event'], qid))
+                _logger.info("Send message %s to %s" % (message['event'], qid))
                 yield 'event: %(event)s\ndata: %(data)s\nid: %(id)s\n\n' % message
             except Empty:
                 # Force check status.

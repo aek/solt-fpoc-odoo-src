@@ -201,6 +201,7 @@ class fiscal_printer(osv.osv):
                 '@  ***GARANTIA***',
                 '101'
             ]
+            
             fparms['name'] = fp.name
             fparms['options'] = options
             fparms['ticket'] = ticket
