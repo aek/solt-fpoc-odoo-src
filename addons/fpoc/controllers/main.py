@@ -37,7 +37,7 @@ import logging
 
 _logger = logging.getLogger(__name__)
 
-access_control_allow_origin = 'chrome-extension://gileacnnoefamnjnhjnijommagpamona'
+access_control_allow_origin = 'chrome-extension://gjhmccleofjjoapghhljicmngapfeibb'#gileacnnoefamnjnhjnijommagpamona'
 event_id = 0
 event_event = {}
 event_result = {}
@@ -92,7 +92,7 @@ def connection_dropped(self, error, environ=None):
             del event_hub[qid]
             _logger.info(u"Removing spools %s by %s" % (qid, str(error).decode('utf8')))
         else:
-            _logger.warning(u"Removing spools %s by %s, but it not was stored." % (qid, str(error).decode('utf8')))
+            _logger.info(u"Removing spools %s by %s, but it not was stored." % (qid, str(error).decode('utf8')))
 
 WSGIRequestHandler.connection_dropped = connection_dropped
 
@@ -155,11 +155,12 @@ def do_return(req, result):
     sid = req.session_id
     pid = req.params.get('printer_id', '')
     qid = ':'.join([sid, pid])
-
+    _logger.info(u"Client request for printer %s with data: %s"%(pid, result))
+    
     if qid not in event_hub:
         _logger.info("<<< Drop message: %s" % result)
         return False
-
+    
     this_event_id = int(result['event_id'])
     event_result[this_event_id] = result
     event_event[this_event_id].set()
