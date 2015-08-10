@@ -238,7 +238,7 @@ class fiscal_printer(osv.osv):
             for prod_line in ticket.get('lines'):
                 price = format_value(prod_line.get('unit_price'))
                 price = '0'*(9-len(price)) + price
-                qty = str(prod_line.get('quantity'))
+                qty = str(int(prod_line.get('quantity')))
                 qty = '0'*(5-len(qty)) + qty
                 lines.append('!%s%s%s000%s'%('0', price, qty, prod_line.get('item_name')))
                 if prod_line.get('discount', False):
