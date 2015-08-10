@@ -196,12 +196,8 @@ class fiscal_printer(osv.osv):
                 price = price - (price * prod_line.get('discount')/100)
                 total += price
                 lines.append('80*%s[%s] B/. %s'%(prod_line.get('item_name'), prod_line.get('unit_price'), prod_line.get('quantity')))
-                qty = str(prod_line.get('quantity'))
-                qty = '0'*(5-len(qty)) + qty
-                lines.append('!%s%s%s000%s'%('0', price, qty, prod_line.get('item_name')))
                 if prod_line.get('discount', False):
-                    discount = format_value(prod_line.get('dicount'))
-                    lines.append('p-%s'%discount)
+                    lines.append('800Descuento:%s'%prod_line.get('dicount'))
             lines.append('800-------------------------')
             lines.append('80*Total B/. %s'%total)
             lines.append('800Vendedor:%s'%prod_line.get('salesman'))
