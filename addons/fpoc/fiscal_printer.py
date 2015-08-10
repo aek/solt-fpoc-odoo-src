@@ -112,12 +112,12 @@ class fiscal_printer(osv.osv):
             if s[p_id]:
                 r[p_id] = {
                     'printerStatus': s[p_id].get('strPrinterStatus', 'Unknown'),
-                    'fiscalStatus': s[p_id].get('strFiscalStatus', 'Unknown'),
+                    'fiscalStatus': s[p_id].get('strFiscalStatus', 'open'),
                 }
             else:
                 r[p_id]= {
                     'printerStatus':'Offline',
-                    'fiscalStatus': 'Offline',
+                    'fiscalStatus': 'open',
                 }
         return r
 
@@ -128,7 +128,7 @@ class fiscal_printer(osv.osv):
         'name': fields.char(string='Name', required=True),
         'lastUpdate': fields.datetime(string='Last Update'),
         'printerStatus': fields.function(_get_status, type="char", method=True, readonly="True", multi="state", string='Printer status'),
-        'fiscalStatus':  fields.function(_get_status, type="char", method=True, readonly="True", multi="state", string='Fiscal status'),
+        'fiscalStatus':  fields.selection([('open', 'Open'),('close', 'Close')], string='Fiscal status'),
         'session_id': fields.char(string='session_id'),
     }
 
@@ -178,37 +178,79 @@ class fiscal_printer(osv.osv):
             r[fp.id] = event_result.pop() if event_result else False
         return r
 
-    def make_fiscal_ticket(self, cr, uid, ids, options={}, ticket={}, context=None):
-        fparms = {}
+    def make_non_fiscal_ticket(self, cr, uid, ids, ticket={}, context=None):
         r = {}
         for fp in self.browse(cr, uid, ids):
             lines = [
-                'jSNOMBRE RAZON SOCIAL', 
-                'jRRUC_CEDULA', 
-                'j3LINEA 3 telefono o Celular o Direccion',
-                'j4LINEA 4 telefono o Celular o Direccion',
-                'j5LINEA 5 telefono o Celular o Direccion',
-                'j6LINEA 6 telefono o Celular o Direccion',
-                '@COMENTARIO',
-                '!00000010000850000001000CHRISTIE`S 3825T/3826T TITANI+ME690',
-                'p-2000',
-                '!000000880000001000PROG. GENERICO',
-                'p-2000',
-                '!000000880000001000PROG. GENERICO',
-                'p-2000',
-                '@prueba de comentarios para que se muestr',
-                '@ en la fiscal',
-                '@  ***GARANTIA***',
-                '101'
+                '80$%s'%ticket.get('partner').get('name'),#NOMBRE RAZON SOCIAL 
+                '800%s'%ticket.get('partner').get('document_number'),#RUC_CEDULA 
+                '800%s'%ticket.get('partner').get('street'),
+                '800%s'%ticket.get('partner').get('city'),
+                '800%s'%ticket.get('partner').get('country'),
+                '800-------------------------',
             ]
+            total = 0
             
-            fparms['name'] = fp.name
-            fparms['options'] = options
-            fparms['ticket'] = ticket
-            event_result = do_event('make_ticket', fparms, session_id=fp.session_id, printer_id=fp.name)
+            for prod_line in ticket.get('lines'):
+                price = prod_line.get('unit_price') * prod_line.get('quantity')
+                price = price - (price * prod_line.get('discount')/100)
+                total += price
+                lines.append('80*%s[%s] B/. %s'%(prod_line.get('item_name'), prod_line.get('unit_price'), prod_line.get('quantity')))
+                qty = str(prod_line.get('quantity'))
+                qty = '0'*(5-len(qty)) + qty
+                lines.append('!%s%s%s000%s'%('0', price, qty, prod_line.get('item_name')))
+                if prod_line.get('discount', False):
+                    discount = format_value(prod_line.get('dicount'))
+                    lines.append('p-%s'%discount)
+            lines.append('800-------------------------')
+            lines.append('80*Total B/. %s'%total)
+            lines.append('800Vendedor:%s'%prod_line.get('salesman'))
+            lines.append('810')
+            
+            event_result = do_event('make_ticket', {'name': fp.name, 'lines': lines}, session_id=fp.session_id, printer_id=fp.name)
             r[fp.id] = event_result.pop() if event_result else False
         return r
-
+    
+    def make_fiscal_ticket(self, cr, uid, ids, ticket={}, context=None):
+        def format_value(value):
+            value = str(value)
+            value = value.replace(',', '.')
+            value = value.split('.')
+            if len(value) == 1:
+                value.append('00')
+            else:
+                if len(value[1]) > 2:
+                    value[1] = value[1][:1]
+                elif len(value[1]) == 1:
+                    value[1] = value[1]+'0'
+            return ''.join(value)
+        r = {}
+        for fp in self.browse(cr, uid, ids):
+            lines = [
+                'jS%s'%ticket.get('partner').get('name'),#NOMBRE RAZON SOCIAL 
+                'jR%s'%ticket.get('partner').get('document_number'),#RUC_CEDULA 
+                'j3%s'%ticket.get('partner').get('street'),
+                'j4%s'%ticket.get('partner').get('city'),
+                'j5%s'%ticket.get('partner').get('country'),
+                #'j6%s'%ticket.get('address'),#street
+                #'@Productos',
+            ]
+            for prod_line in ticket.get('lines'):
+                price = format_value(prod_line.get('unit_price'))
+                price = '0'*(9-len(price)) + price
+                qty = str(prod_line.get('quantity'))
+                qty = '0'*(5-len(qty)) + qty
+                lines.append('!%s%s%s000%s'%('0', price, qty, prod_line.get('item_name')))
+                if prod_line.get('discount', False):
+                    discount = format_value(prod_line.get('dicount'))
+                    lines.append('p-%s'%discount)
+            lines.append('@Gracias por su visita')
+            lines.append('101')
+            
+            event_result = do_event('make_ticket', {'name': fp.name, 'lines': lines}, session_id=fp.session_id, printer_id=fp.name)
+            r[fp.id] = event_result.pop() if event_result else False
+        return r
+    
 fiscal_printer()
 
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:
