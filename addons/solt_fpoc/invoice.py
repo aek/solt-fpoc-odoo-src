@@ -70,7 +70,7 @@ class fpoc_invoice(osv.osv):
                 r = inv.make_fiscal_ticket(ticket)[inv.id]
                 if r:
                     if context.get('fiscal', False):
-                        inv.write({'internal_number': r['id'], 'fiscal_status': 'print'})
+                        inv.write({'internal_number': r[0]['id'], 'fiscal_status': 'print'})
                     elif context.get('fiscal_refund', False):
                         inv.write({'fiscal_status': 'refund'})
         if r and 'error' not in r:
