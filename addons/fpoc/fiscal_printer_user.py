@@ -78,7 +78,9 @@ class fiscal_printer_user(osv.AbstractModel):
             fp_id = usr.fiscal_printer_id.id
             if context.get('non_fiscal', False):
                 r[usr.id] = fp_obj.make_non_fiscal_ticket(cr, uid, [fp_id], ticket=ticket, context=context)[fp_id]
-            else:
+            elif context.get('fiscal_refund', False):
+                r[usr.id] = fp_obj.make_fiscal_ticket_refund(cr, uid, [fp_id], ticket=ticket, context=context)[fp_id]
+            elif context.get('fiscal', False):
                 r[usr.id] = fp_obj.make_fiscal_ticket(cr, uid, [fp_id], ticket=ticket, context=context)[fp_id]
             if isinstance(r[usr.id], RuntimeError) and r[usr.id].message == "Timeout":
                 raise osv.except_osv(_('Error!'), _('Timeout happen!!'))

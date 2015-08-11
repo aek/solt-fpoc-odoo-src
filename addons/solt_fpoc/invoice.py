@@ -26,51 +26,6 @@ from openerp import netsvc
 from openerp.osv import osv, fields
 from openerp.tools.translate import _
 
-_vat = lambda x: x.tax_code_id.parent_id.name == 'IVA'
-
-document_type_map = {
-    "DNI":      "D",
-    "CUIL":     "L",
-    "CUIT":     "T",
-    "CPF":      "C",
-    "CIB":      "C",
-    "CIK":      "C",
-    "CIX":      "C",
-    "CIW":      "C",
-    "CIE":      "C",
-    "CIY":      "C",
-    "CIM":      "C",
-    "CIF":      "C",
-    "CIA":      "C",
-    "CIJ":      "C",
-    "CID":      "C",
-    "CIS":      "C",
-    "CIG":      "C",
-    "CIT":      "C",
-    "CIH":      "C",
-    "CIU":      "C",
-    "CIP":      "C",
-    "CIN":      "C",
-    "CIQ":      "C",
-    "CIL":      "C",
-    "CIR":      "C",
-    "CIZ":      "C",
-    "CIV":      "C",
-    "PASS":     "P",
-    "LC":       "V",
-    "LE":       "E",
-};
-
-responsability_map = {
-    "IVARI":  "I", # Inscripto, 
-    "IVARNI": "N", # No responsable, 
-    "RM":     "M", # Monotributista,
-    "IVAE":   "E", # Exento,
-    "NC":     "U", # No categorizado,
-    "CF":     "F", # Consumidor final,
-    "RMS":    "T", # Monotributista social,
-    "RMTIP":  "P", # Monotributista trabajador independiente promovido.
-}
 
 class fpoc_invoice(osv.osv):
     """"""
@@ -95,19 +50,29 @@ class fpoc_invoice(osv.osv):
                         "country": inv.partner_id.country_id.name,
                         "document_number": inv.partner_id.curp,
                     },
+                    'internal_number': inv.internal_number, 
                     "lines": [ ],
                     "salesman": _("Saleman: %s") % inv.user_id.name if inv.user_id.name else "",
                 }
                 for line in inv.invoice_line:
+                    taxes = line.invoice_line_tax_id
+                    if taxes:
+                        tax = int(taxes[0].amount * 100)
+                    else:
+                        tax = 0
                     ticket["lines"].append({
                         "item_name": line.name,
                         "quantity": line.quantity,
                         "unit_price": line.price_unit,
                         "discount": line.discount,
-                        #"vat_rate": ([ tax.amount*100 for tax in line.invoice_line_tax_id.filtered(_vat)]+[0.0])[0],
+                        "tax": tax,
                     })
                 r = inv.make_fiscal_ticket(ticket)[inv.id]
-
+                if r:
+                    if context.get('fiscal', False):
+                        inv.write({'internal_number': r['id'], 'fiscal_status': 'print'})
+                    elif context.get('fiscal_refund', False):
+                        inv.write({'fiscal_status': 'refund'})
         if r and 'error' not in r:
             return True
         elif r and 'error' in r:
@@ -119,8 +84,12 @@ class fpoc_invoice(osv.osv):
     
     _columns = {
         'use_fiscal_printer': fields.boolean('Associated to a fiscal printer'),
+        'fiscal_status': fields.selection([('draft','Draft'),('print', 'Print'),('refund', 'Refund')], string="Fiscal Status"),
     }
     
+    _defaults = {
+        'fiscal_status': 'draft',
+    }
 fpoc_invoice()
 
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

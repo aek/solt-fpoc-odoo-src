@@ -30,6 +30,9 @@ from datetime import datetime
 
 from controllers.main import DenialService
 
+itbms = {'0': ' ','7': '!','10': '"'}
+itbms_ref = {'0': '0','7': '1','10': '2'}
+
 class fiscal_printer_disconnected(osv.TransientModel):
     """
     Disconnected but published printers.
@@ -132,12 +135,6 @@ class fiscal_printer(osv.osv):
         'session_id': fields.char(string='session_id'),
     }
 
-    _defaults = {
-    }
-
-    _constraints = [
-    ]
-
     _sql_constraints = [ ('model_serialNumber_unique', 'unique("model", "serialNumber")', 'this printer with this model and serial number yet exists') ]
 
     def short_test(self, cr, uid, ids, context=None):
@@ -236,7 +233,46 @@ class fiscal_printer(osv.osv):
                 price = '0'*(9-len(price)) + price
                 qty = str(int(prod_line.get('quantity')))
                 qty = '0'*(5-len(qty)) + qty
-                lines.append('!%s%s%s000%s'%('0', price, qty, prod_line.get('item_name')))
+                lines.append('%s0%s%s000%s'%(itbms.get(prod_line.get('tax', ' ')), price, qty, prod_line.get('item_name')))
+                if prod_line.get('discount', False):
+                    discount = format_value(prod_line.get('dicount'))
+                    lines.append('p-%s'%discount)
+            lines.append('@Gracias por su visita')
+            lines.append('101')
+            
+            event_result = do_event('make_ticket', {'name': fp.name, 'lines': lines}, session_id=fp.session_id, printer_id=fp.name)
+            r[fp.id] = event_result.pop() if event_result else False
+        return r
+    
+    def make_fiscal_ticket_refund(self, cr, uid, ids, ticket={}, context=None):
+        def format_value(value):
+            value = str(value)
+            value = value.replace(',', '.')
+            value = value.split('.')
+            if len(value) == 1:
+                value.append('00')
+            else:
+                if len(value[1]) > 2:
+                    value[1] = value[1][:1]
+                elif len(value[1]) == 1:
+                    value[1] = value[1]+'0'
+            return ''.join(value)
+        r = {}
+        for fp in self.browse(cr, uid, ids):
+            lines = [
+                'jS%s'%ticket.get('partner').get('name'),#NOMBRE RAZON SOCIAL 
+                'jR%s'%ticket.get('partner').get('document_number'),#RUC_CEDULA 
+                'j3%s'%ticket.get('partner').get('street'),
+                'j4%s'%ticket.get('partner').get('city'),
+                'j5%s'%ticket.get('partner').get('country'),
+                'jF%s-%s'%('TFBX110006240', ticket.get('internal_number')),
+            ]
+            for prod_line in ticket.get('lines'):
+                price = format_value(prod_line.get('unit_price'))
+                price = '0'*(9-len(price)) + price
+                qty = str(int(prod_line.get('quantity')))
+                qty = '0'*(5-len(qty)) + qty
+                lines.append('d%s%s%s000%s'%(itbms_ref.get(prod_line.get('tax', ' ')), price, qty, prod_line.get('item_name')))
                 if prod_line.get('discount', False):
                     discount = format_value(prod_line.get('dicount'))
                     lines.append('p-%s'%discount)

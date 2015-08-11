@@ -8,12 +8,15 @@
         <field name="inherit_id" ref="account.invoice_form" />
         <field name="arch" type="xml">
             <button name="invoice_print" position="after">
-                <button name="action_fiscal_printer" string="Print Fiscal" type="object" attrs="{'invisible':['|',('sent','=',True), ('state', '!=', 'open')]}" class="oe_highlight" groups="base.group_user"/>
-                <button name="action_fiscal_printer" string="Print NonFiscal" type="object" context="{'non_fiscal': True}" attrs="{'invisible':['|',('sent','=',True), ('state', '!=', 'open')]}" class="oe_highlight" groups="base.group_user"/>
+                <button name="action_fiscal_printer" string="Print Fiscal" type="object" context="{'fiscal': True}" attrs="{'invisible':[('state', '!=', 'paid'),('fiscal_status', '=', 'draft')]}" class="oe_highlight" groups="base.group_user"/>
+                <button name="action_fiscal_printer" string="Print NonFiscal" type="object" context="{'non_fiscal': True}" attrs="{'invisible':[('state', '!=', 'paid'),('fiscal_status', 'in', ('draft','print'))]}" class="oe_highlight" groups="base.group_user"/>
+                <button name="action_fiscal_printer" string="Print Fiscal Refund" type="object" context="{'fiscal_refund': True}" attrs="{'invisible':[('fiscal_status', '!=', 'print')]}" class="oe_highlight" groups="base.group_user"/>
             </button>
             <field name="sent" position="after">
                 <group>
                     <field name='use_fiscal_printer'/>
+                    <field name='internal_number' attrs="{'invisible': ['|',('use_fiscal_printer','=',False),('fiscal_status', '=', 'draft')]}" string="Fiscal Invoice Number"/>
+                    <field name="fiscal_status" widget="statusbar" attrs="{'invisible': [('use_fiscal_printer','=',False)]}"/>
                 </group>
             </field>
             <notebook position="inside">
