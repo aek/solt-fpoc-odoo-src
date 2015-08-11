@@ -65,7 +65,7 @@ class fpoc_invoice(osv.osv):
                         "quantity": line.quantity,
                         "unit_price": line.price_unit,
                         "discount": line.discount,
-                        "tax": tax,
+                        "tax": str(tax),
                     })
                 r = inv.make_fiscal_ticket(ticket)[inv.id]
                 if r:
