@@ -233,8 +233,8 @@ class fiscal_printer(osv.osv):
         r = {}
         for fp in self.browse(cr, uid, ids):
             lines = [
-                'jS%s'%ticket.get('partner').get('name'),#NOMBRE RAZON SOCIAL 
                 'jR%s'%ticket.get('partner').get('document_number'),#RUC_CEDULA 
+                'jS%s'%ticket.get('partner').get('name'),#NOMBRE RAZON SOCIAL 
                 'j3%s'%ticket.get('partner').get('street'),
                 'j4%s'%ticket.get('partner').get('city'),
                 'j5%s'%ticket.get('partner').get('country'),
@@ -248,7 +248,7 @@ class fiscal_printer(osv.osv):
                 qty = '0'*(5-len(qty)) + qty
                 lines.append('%s0%s%s000%s'%(itbms.get(prod_line.get('tax', ' ')), price, qty, prod_line.get('item_name')))
                 if prod_line.get('discount', False):
-                    discount = format_value(prod_line.get('dicount'))
+                    discount = format_value(prod_line.get('discount'))
                     lines.append('p-%s'%discount)
             lines.append('@Gracias por su visita')
             lines.append('101')
@@ -273,8 +273,8 @@ class fiscal_printer(osv.osv):
         r = {}
         for fp in self.browse(cr, uid, ids):
             lines = [
-                'jS%s'%ticket.get('partner').get('name'),#NOMBRE RAZON SOCIAL 
                 'jR%s'%ticket.get('partner').get('document_number'),#RUC_CEDULA 
+                'jS%s'%ticket.get('partner').get('name'),#NOMBRE RAZON SOCIAL 
                 'j3%s'%ticket.get('partner').get('street'),
                 'j4%s'%ticket.get('partner').get('city'),
                 'j5%s'%ticket.get('partner').get('country'),
