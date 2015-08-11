@@ -89,6 +89,7 @@ class fiscal_printer_disconnected(osv.TransientModel):
                 'session_id': pri.session_id,
             }
             fp_obj.create(cr, uid, values)
+        
         return {
             'name': _('Fiscal Printers'),
             'domain': [],
@@ -106,10 +107,18 @@ class fiscal_printer(osv.osv):
     """
     The fiscal printer entity.
     """
-
+    def _get_status_z(self, cr, uid, ids, field_name, arg, context=None):
+        res = {}
+        today = fields.date.context_today(self, cr, uid, context)
+        for printer in self.browse(cr, uid, ids, context):
+            if printer.fiscal_config_id.close_date == today:
+                res[printer.id] = False
+            else:
+                res[printer.id] = True
+        return res
+    
     def _get_status(self, cr, uid, ids, field_name, arg, context=None):
-        s = self.get_state(cr, uid, ids, context) 
-
+        s = self.get_state(cr, uid, ids, context)
         r = {}
         for p_id in ids:
             if s[p_id]:
@@ -133,6 +142,8 @@ class fiscal_printer(osv.osv):
         'printerStatus': fields.function(_get_status, type="char", method=True, readonly="True", multi="state", string='Printer status'),
         'fiscalStatus':  fields.selection([('open', 'Open'),('close', 'Close')], string='Fiscal status'),
         'session_id': fields.char(string='session_id'),
+        'fiscal_config_id': fields.many2one('fpoc.configuration', 'Configuration'),
+        'allow_z': fields.function(_get_status_z, type="boolean", method=True, readonly="True", string='Allow Report Z'),
     }
 
     _sql_constraints = [ ('model_serialNumber_unique', 'unique("model", "serialNumber")', 'this printer with this model and serial number yet exists') ]
@@ -160,8 +171,10 @@ class fiscal_printer(osv.osv):
         return True
 
     def report_z(self, cr, uid, ids, context=None):
+        today = fields.date.context_today(self, cr, uid, context)
         for fp in self.browse(cr, uid, ids):
             do_event('make_report', {'name': fp.name, 'type': 'I0Z'}, session_id=fp.session_id, printer_id=fp.name)
+            fp.fiscal_config_id.write({'close_date': today})
         return True
 
     def get_state(self, cr, uid, ids, context=None):

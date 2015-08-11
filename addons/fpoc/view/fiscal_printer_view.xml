@@ -37,31 +37,21 @@
             <field name="model">fpoc.fiscal_printer</field>
             <field name="arch" type="xml">
                 <form string="fiscal_printer" version="7.0">
+                    <field name="allow_z" invisible="1"/>
                     <header>
+                        <button name="report_x" type="object" string="Report X" class="oe_highlight" />
+                        <button name="report_z" type="object" string="Report Z" class="oe_highlight" attrs="{'invisible': [('allow_z','=',False)]}"/>
+                        <button name="short_test" type="object" string="Test"/>
                     </header>
                     <sheet string="fiscal_printer">
-                     <group>
-                        <field name="name" />
-                        <field name="lastUpdate"/>
-                        <field name="session_id"/>
-                     </group>
-                        <notebook>
-                            <page string="Status">
-                                <group>
-                                <field name="printerStatus" />
-                                <field name="fiscalStatus" />
-                                </group>
-                            </page>
-                            <page string="Attributes">
-                            </page>
-                            <page string="Actions">
-                                <separator string="Test"/>
-                                <button name="short_test" type="object" string="Test"/>
-                                <separator string="Fiscal Management"/>
-                                <button name="report_x" type="object" string="Report X"/>
-                                <button name="report_z" type="object" string="Report Z"/>
-                            </page>
-                        </notebook>
+                        <group>
+                           <field name="name" />
+                           <field name="lastUpdate"/>
+                           <field name="session_id"/>
+                           <field name='fiscal_config_id' required="1"/>
+                           <field name="printerStatus" />
+                           <field name="fiscalStatus" />
+                        </group>
                     </sheet>
                 </form>
             </field>
@@ -86,8 +76,8 @@
             <field name="arch" type="xml">
                 <tree string="Fiscal Printer Configuration">
                     <field name="name" />
-                    <field name="type" />
-                    <field name="protocol" />
+                    <field name="serial" />
+                    <field name="close_date" />
                 </tree>
             </field>
         </record>
@@ -101,8 +91,8 @@
                 <form string="Fiscal Printer Configuration" version="7.0">
                      <group id="main">
                         <field name="name" />
-                        <field name="type" on_change="onchange_type(type)"/>
-                        <field name="protocol" invisible="1"/>
+                        <field name="serial" />
+                        <field name="close_date" />
                      </group>
                 </form>
             </field>
