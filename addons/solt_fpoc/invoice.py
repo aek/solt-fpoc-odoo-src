@@ -26,6 +26,7 @@ from openerp import netsvc
 from openerp.osv import osv, fields
 from openerp.tools.translate import _
 import logging
+import json
 
 _logger = logging.getLogger(__name__)
 
@@ -73,17 +74,14 @@ class fpoc_invoice(osv.osv):
                 if r:
                     _logger.info('Respuesta de la Impresora: %s'%str(r))
                     if context.get('fiscal', False):
-                        inv.write({'internal_number': r[0]['id'], 'fiscal_status': 'print'})
+                        inv.write({'internal_number': r[0]['response']['id'], 'fiscal_status': 'print'})
                     elif context.get('fiscal_refund', False):
                         inv.write({'fiscal_status': 'refund'})
         if r and 'error' not in r:
             return True
-        elif r and 'error' in r:
-            raise osv.except_osv(_(u'Cancelling Validation'),
-                                 _('Error: %s') % r['error'])
         else:
             raise osv.except_osv(_(u'Cancelling Validation'),
-                                 _(u'Unknown error.'))
+                                 _('Error: %s') % r[0]['response'])
     
     _columns = {
         'use_fiscal_printer': fields.boolean('Associated to a fiscal printer'),
