@@ -25,7 +25,9 @@ import re
 from openerp import netsvc
 from openerp.osv import osv, fields
 from openerp.tools.translate import _
+import logging
 
+_logger = logging.getLogger(__name__)
 
 class fpoc_invoice(osv.osv):
     """"""
@@ -69,6 +71,7 @@ class fpoc_invoice(osv.osv):
                     })
                 r = inv.make_fiscal_ticket(ticket)[inv.id]
                 if r:
+                    _logger.info('Respuesta de la Impresora: %s'%str(r))
                     if context.get('fiscal', False):
                         inv.write({'internal_number': r[0]['id'], 'fiscal_status': 'print'})
                     elif context.get('fiscal_refund', False):
@@ -89,6 +92,7 @@ class fpoc_invoice(osv.osv):
     
     _defaults = {
         'fiscal_status': 'draft',
+        'use_fiscal_printer': True,
     }
 fpoc_invoice()
 
