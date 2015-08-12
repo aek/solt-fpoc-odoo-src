@@ -199,13 +199,11 @@ class FiscalPrinterController(oeweb.Controller):
         qid = ':'.join([sid, pid])
         self.qid = qid
 
-        #=======================================================================
-        # if (qid in event_hub):
-        #     _logger.info("Close connection spool %s by duplication." % qid)
-        #     return req.make_response('\n\nevent: close\n\n\n\n',
-        #                          [('cache-control', 'no-cache'),
-        #                           ('Content-Type', 'text/event-stream')])
-        #=======================================================================
+        if (qid in event_hub):
+            _logger.info("Close connection spool %s by duplication." % qid)
+            return req.make_response('\n\nevent: close\n\n\n\n',
+                                 [('cache-control', 'no-cache'),
+                                  ('Content-Type', 'text/event-stream')])
 
         _logger.info("Open new connection spool: %s" % qid)
 
