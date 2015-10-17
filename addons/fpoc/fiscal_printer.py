@@ -194,9 +194,9 @@ class fiscal_printer(osv.osv):
             lines = [
                 '80$%s'%ticket.get('partner').get('name'),#NOMBRE RAZON SOCIAL 
                 '800%s'%ticket.get('partner').get('document_number'),#RUC_CEDULA 
-                '800%s'%ticket.get('partner').get('street'),
-                '800%s'%ticket.get('partner').get('city'),
-                '800%s'%ticket.get('partner').get('country'),
+                '800%s'%ticket.get('partner').get('street', ''),
+                '800%s'%ticket.get('partner').get('city', ''),
+                '800%s'%ticket.get('partner').get('country', ''),
                 '800-------------------------',
             ]
             total = 0
@@ -207,7 +207,7 @@ class fiscal_printer(osv.osv):
                 total += price
                 lines.append('80*%s[%s] B/. %s'%(prod_line.get('item_name'), prod_line.get('unit_price'), prod_line.get('quantity')))
                 if prod_line.get('discount', False):
-                    lines.append('800Descuento:%s'%prod_line.get('dicount'))
+                    lines.append('800Descuento:%s'%prod_line.get('discount'))
             lines.append('800-------------------------')
             lines.append('80*Total B/. %s'%total)
             lines.append('800Vendedor:%s'%prod_line.get('salesman'))
@@ -235,9 +235,9 @@ class fiscal_printer(osv.osv):
             lines = [
                 'jR%s'%ticket.get('partner').get('document_number'),#RUC_CEDULA 
                 'jS%s'%ticket.get('partner').get('name'),#NOMBRE RAZON SOCIAL 
-                'j3%s'%ticket.get('partner').get('street'),
-                'j4%s'%ticket.get('partner').get('city'),
-                'j5%s'%ticket.get('partner').get('country'),
+                'j3%s'%ticket.get('partner').get('street', ''),
+                'j4%s'%ticket.get('partner').get('city', ''),
+                'j5%s'%ticket.get('partner').get('country', ''),
                 #'j6%s'%ticket.get('address'),#street
                 #'@Productos',
             ]
@@ -275,9 +275,9 @@ class fiscal_printer(osv.osv):
             lines = [
                 'jR%s'%ticket.get('partner').get('document_number'),#RUC_CEDULA 
                 'jS%s'%ticket.get('partner').get('name'),#NOMBRE RAZON SOCIAL 
-                'j3%s'%ticket.get('partner').get('street'),
-                'j4%s'%ticket.get('partner').get('city'),
-                'j5%s'%ticket.get('partner').get('country'),
+                'j3%s'%ticket.get('partner').get('street', ''),
+                'j4%s'%ticket.get('partner').get('city', ''),
+                'j5%s'%ticket.get('partner').get('country', ''),
                 'jF%s-%s'%('TFBX110006240', ticket.get('internal_number')),
             ]
             for prod_line in ticket.get('lines'):
@@ -287,7 +287,7 @@ class fiscal_printer(osv.osv):
                 qty = '0'*(5-len(qty)) + qty
                 lines.append('d%s%s%s000%s'%(itbms_ref.get(prod_line.get('tax', ' ')), price, qty, prod_line.get('item_name')))
                 if prod_line.get('discount', False):
-                    discount = format_value(prod_line.get('dicount'))
+                    discount = format_value(prod_line.get('discount'))
                     lines.append('p-%s'%discount)
             lines.append('@Gracias por su visita')
             lines.append('101')
