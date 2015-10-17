@@ -9,7 +9,7 @@
         <field name="arch" type="xml">
             <button name="invoice_print" position="after">
                 <button name="action_fiscal_printer" string="Print Fiscal" type="object" context="{'fiscal': True}" attrs="{'invisible':[('state', '!=', 'paid'),('fiscal_status', 'in', ('draft','refund'))]}" class="oe_highlight" groups="base.group_user"/>
-                <button name="action_fiscal_printer" string="Print NonFiscal" type="object" context="{'non_fiscal': True}" attrs="{'invisible':[('state', '!=', 'paid'),('fiscal_status', 'in', ('draft','print'))]}" class="oe_highlight" groups="base.group_user"/>
+                <!--<button name="action_fiscal_printer" string="Print NonFiscal" type="object" context="{'non_fiscal': True}" attrs="{'invisible':[('state', '!=', 'paid'),('fiscal_status', 'in', ('draft','print'))]}" class="oe_highlight" groups="base.group_user"/>-->
                 <button name="action_fiscal_printer" string="Print Fiscal Refund" type="object" context="{'fiscal_refund': True}" attrs="{'invisible':[('fiscal_status', '!=', 'print')]}" class="oe_highlight" groups="base.group_user"/>
             </button>
             <field name="sent" position="after">
