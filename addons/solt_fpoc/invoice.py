@@ -64,7 +64,7 @@ class fpoc_invoice(osv.osv):
                     else:
                         tax = 0
                     ticket["lines"].append({
-                        "item_name": line.name,
+                        "item_name": line.product_id.name,
                         "quantity": line.quantity,
                         "unit_price": line.price_unit,
                         "discount": line.discount,
