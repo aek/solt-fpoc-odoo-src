@@ -243,10 +243,10 @@ class fiscal_printer(osv.osv):
             ]
             for prod_line in ticket.get('lines'):
                 price = format_value(prod_line.get('unit_price'))
-                price = '0'*(9-len(price)) + price
+                price = '0'*(10-len(price)) + price
                 qty = str(int(prod_line.get('quantity')))
                 qty = '0'*(5-len(qty)) + qty
-                lines.append('%s0%s%s000%s'%(itbms.get(prod_line.get('tax', ' ')), price, qty, prod_line.get('item_name')))
+                lines.append('%s%s%s000%s'%(itbms.get(prod_line.get('tax', ' ')), price, qty, prod_line.get('item_name')))
                 if prod_line.get('discount', False):
                     discount = format_value(prod_line.get('discount'))
                     lines.append('p-%s'%discount)
@@ -282,10 +282,10 @@ class fiscal_printer(osv.osv):
             ]
             for prod_line in ticket.get('lines'):
                 price = format_value(prod_line.get('unit_price'))
-                price = '0'*(9-len(price)) + price
+                price = '0'*(10-len(price)) + price
                 qty = str(int(prod_line.get('quantity')))
                 qty = '0'*(5-len(qty)) + qty
-                lines.append('d%s%s%s000%s'%(itbms_ref.get(prod_line.get('tax', ' ')), price, qty, prod_line.get('item_name')))
+                lines.append('d%s%s%s000%s'%(itbms_ref.get(prod_line.get('tax', '0')), price, qty, prod_line.get('item_name')))
                 if prod_line.get('discount', False):
                     discount = format_value(prod_line.get('discount'))
                     lines.append('p-%s'%discount)
