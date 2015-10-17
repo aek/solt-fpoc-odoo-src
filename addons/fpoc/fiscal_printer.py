@@ -278,7 +278,7 @@ class fiscal_printer(osv.osv):
                 'j3%s'%ticket.get('partner').get('street', ''),
                 'j4%s'%ticket.get('partner').get('city', ''),
                 'j5%s'%ticket.get('partner').get('country', ''),
-                'jF%s-%s'%('TFBX110006240', ticket.get('internal_number')),
+                'jF%s-%s'%(fp.fiscal_config_id.serial, ticket.get('internal_number')),
             ]
             for prod_line in ticket.get('lines'):
                 price = format_value(prod_line.get('unit_price'))

@@ -47,10 +47,10 @@ class fpoc_invoice(osv.osv):
                 ticket={
                     "debit_note": False,
                     "partner": {
-                        "name": inv.partner_id.name,
-                        "street": inv.partner_id.street,
-                        "city": inv.partner_id.city,
-                        "country": inv.partner_id.country_id.name,
+                        "name": inv.partner_id.name or '',
+                        "street": inv.partner_id.street or '',
+                        "city": inv.partner_id.city or '',
+                        "country": inv.partner_id.country_id.name or '',
                         "document_number": inv.partner_id.curp,
                     },
                     'internal_number': inv.internal_number, 

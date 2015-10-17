@@ -8,8 +8,9 @@ class fiscal_printer_configuration(osv.osv):
     _description = 'Fiscal printer configuration'
 
     _columns = {
-        'name': fields.char(string='Name', size=64),
-        'serial': fields.char('Serial Number', size=64),
+        'name': fields.char(string='Brand', size=64),
+        'model': fields.char('Model', size=64),
+        'serial': fields.char('Registry Number', size=64),
         'close_date': fields.date('Report Z Last Date'),
     }
 

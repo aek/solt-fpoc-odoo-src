@@ -10,8 +10,7 @@
                     <field name="name"/>
                     <field name="user_id"/>
                     <field name="session_id"/>
-                    <button type="object" name="create_fiscal_printer" string="Create"
-                        icon="STOCK_NEW"/>
+                    <button type="object" name="create_fiscal_printer" string="Create" icon="STOCK_NEW"/>
                 </tree>
             </field>
         </record>
@@ -91,6 +90,7 @@
                 <form string="Fiscal Printer Configuration" version="7.0">
                      <group id="main">
                         <field name="name" />
+                         <field name="model" />
                         <field name="serial" />
                         <field name="close_date" />
                      </group>
