@@ -1,0 +1,103 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+#
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 8.0-20150713\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2015-10-18 12:02+0000\n"
+"PO-Revision-Date: 2015-10-18 12:02+0000\n"
+"Last-Translator: <>\n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: \n"
+"Plural-Forms: \n"
+
+#. module: solt_fpoc
+#: field:account.invoice,fiscal_printer_anon_partner_id:0
+msgid "Anonymous partner"
+msgstr "Cliente Anónimo"
+
+#. module: solt_fpoc
+#: field:account.invoice,use_fiscal_printer:0
+msgid "Associated to a fiscal printer"
+msgstr "Asociado a una impresora fiscal"
+
+#. module: solt_fpoc
+#: code:addons/solt_fpoc/invoice.py:41
+#: code:addons/solt_fpoc/invoice.py:83
+#, python-format
+msgid "Cancelling Validation"
+msgstr "Validación de Cancelación"
+
+#. module: solt_fpoc
+#: selection:account.invoice,fiscal_status:0
+msgid "Draft"
+msgstr "Borrador"
+
+#. module: solt_fpoc
+#: code:addons/solt_fpoc/invoice.py:84
+#, python-format
+msgid "Error: %s"
+msgstr "Error: %s"
+
+#. module: solt_fpoc
+#: view:account.invoice:solt_fpoc.view_account_invoice_fop_form
+msgid "Fiscal Invoice Number"
+msgstr "Número de Factura Fiscal"
+
+#. module: solt_fpoc
+#: view:account.invoice:solt_fpoc.view_account_invoice_fop_form
+#: field:account.invoice,fiscal_printer_id:0
+msgid "Fiscal Printer"
+msgstr "Impresora Fiscal"
+
+#. module: solt_fpoc
+#: field:account.invoice,fiscal_status:0
+msgid "Fiscal Status"
+msgstr "Estado Fiscal"
+
+#. module: solt_fpoc
+#: model:ir.model,name:solt_fpoc.model_account_invoice
+msgid "Invoice"
+msgstr "Factura"
+
+#. module: solt_fpoc
+#: code:addons/solt_fpoc/invoice.py:42
+#, python-format
+msgid "Please, validate one ticket at time."
+msgstr "Por favor, validar un ticket cada vez."
+
+#. module: solt_fpoc
+#: selection:account.invoice,fiscal_status:0
+msgid "Print"
+msgstr "Imprimir"
+
+#. module: solt_fpoc
+#: view:account.invoice:solt_fpoc.view_account_invoice_fop_form
+msgid "Print Fiscal"
+msgstr "Imprimir Fiscal"
+
+#. module: solt_fpoc
+#: view:account.invoice.refund:solt_fpoc.view_fpoc_account_invoice_refund
+msgid "Create Fiscal Refund"
+msgstr "Crear Reembolso Fiscal"
+
+#. module: solt_fpoc
+#: view:account.invoice:solt_fpoc.view_account_invoice_fop_form
+msgid "Print NonFiscal"
+msgstr "Imprimir no fiscales"
+
+#. module: solt_fpoc
+#: selection:account.invoice,fiscal_status:0
+msgid "Refund"
+msgstr "Reembolso"
+
+#. module: solt_fpoc
+#: code:addons/solt_fpoc/invoice.py:58
+#, python-format
+msgid "Saleman: %s"
+msgstr "Vendedor: %s"
+

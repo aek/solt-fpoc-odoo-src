@@ -94,4 +94,26 @@ class fpoc_invoice(osv.osv):
     }
 fpoc_invoice()
 
+class fpoc_refund(osv.osv):
+    _inherit = 'account.invoice.refund'
+
+    _columns = {
+        'fiscal_status': fields.dummy(type='char'),
+    }
+    def _get_fiscal_status(self, cr, uid, context=None):
+        inv = self.pool.get('account.invoice').browse(cr, uid, context.get('active_ids'))[0]
+        if inv.internal_number:
+            return inv.fiscal_status
+        return 'draft'
+
+    _defaults = {
+        'fiscal_status': _get_fiscal_status,
+    }
+
+    def action_fiscal_refund(self, cr, uid, ids, context=None):
+        self.invoice_refund(cr, uid, ids, context=context)
+        self.pool.get('account.invoice').action_fiscal_printer(cr, uid, context.get('active_ids'), context={'fiscal_refund': True})
+
+fpoc_refund()
+
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

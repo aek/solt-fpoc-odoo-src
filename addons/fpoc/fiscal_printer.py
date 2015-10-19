@@ -188,34 +188,34 @@ class fiscal_printer(osv.osv):
             r[fp.id] = event_result.pop() if event_result else False
         return r
 
-    def make_non_fiscal_ticket(self, cr, uid, ids, ticket={}, context=None):
-        r = {}
-        for fp in self.browse(cr, uid, ids):
-            lines = [
-                '80$%s'%ticket.get('partner').get('name'),#NOMBRE RAZON SOCIAL 
-                '800%s'%ticket.get('partner').get('document_number'),#RUC_CEDULA 
-                '800%s'%ticket.get('partner').get('street', ''),
-                '800%s'%ticket.get('partner').get('city', ''),
-                '800%s'%ticket.get('partner').get('country', ''),
-                '800-------------------------',
-            ]
-            total = 0
-            
-            for prod_line in ticket.get('lines'):
-                price = prod_line.get('unit_price') * prod_line.get('quantity')
-                price = price - (price * prod_line.get('discount')/100)
-                total += price
-                lines.append('80*%s[%s] B/. %s'%(prod_line.get('item_name'), prod_line.get('unit_price'), prod_line.get('quantity')))
-                if prod_line.get('discount', False):
-                    lines.append('800Descuento:%s'%prod_line.get('discount'))
-            lines.append('800-------------------------')
-            lines.append('80*Total B/. %s'%total)
-            lines.append('800Vendedor:%s'%prod_line.get('salesman'))
-            lines.append('810')
-            
-            event_result = do_event('make_ticket', {'name': fp.name, 'lines': lines}, session_id=fp.session_id, printer_id=fp.name)
-            r[fp.id] = event_result.pop() if event_result else False
-        return r
+    # def make_non_fiscal_ticket(self, cr, uid, ids, ticket={}, context=None):
+    #     r = {}
+    #     for fp in self.browse(cr, uid, ids):
+    #         lines = [
+    #             '80$%s'%ticket.get('partner').get('name'),#NOMBRE RAZON SOCIAL
+    #             '800%s'%ticket.get('partner').get('document_number'),#RUC_CEDULA
+    #             '800%s'%ticket.get('partner').get('street', ''),
+    #             '800%s'%ticket.get('partner').get('city', ''),
+    #             '800%s'%ticket.get('partner').get('country', ''),
+    #             '800-------------------------',
+    #         ]
+    #         total = 0
+    #
+    #         for prod_line in ticket.get('lines'):
+    #             price = prod_line.get('unit_price') * prod_line.get('quantity')
+    #             price = price - (price * prod_line.get('discount')/100)
+    #             total += price
+    #             lines.append('80*%s[%s] B/. %s'%(prod_line.get('item_name'), prod_line.get('unit_price'), prod_line.get('quantity')))
+    #             if prod_line.get('discount', False):
+    #                 lines.append('800Descuento:%s'%prod_line.get('discount'))
+    #         lines.append('800-------------------------')
+    #         lines.append('80*Total B/. %s'%total)
+    #         lines.append('800Vendedor:%s'%prod_line.get('salesman'))
+    #         lines.append('810')
+    #
+    #         event_result = do_event('make_ticket', {'name': fp.name, 'lines': lines}, session_id=fp.session_id, printer_id=fp.name)
+    #         r[fp.id] = event_result.pop() if event_result else False
+    #     return r
     
     def make_fiscal_ticket(self, cr, uid, ids, ticket={}, context=None):
         def format_value(value):

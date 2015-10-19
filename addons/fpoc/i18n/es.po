@@ -1,0 +1,272 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+#
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 8.0-20150713\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2015-10-18 12:11+0000\n"
+"PO-Revision-Date: 2015-10-18 12:11+0000\n"
+"Last-Translator: <>\n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: \n"
+"Plural-Forms: \n"
+
+#. module: fpoc
+#: field:fpoc.fiscal_printer,allow_z:0
+msgid "Allow Report Z"
+msgstr "Permitir Informe Z"
+
+#. module: fpoc
+#: field:fpoc.user,fiscal_printer_anon_partner_id:0
+msgid "Anonymous partner"
+msgstr "Cliente Anónimo"
+
+#. module: fpoc
+#: field:fpoc.configuration,name:0
+msgid "Brand"
+msgstr "Marca"
+
+#. module: fpoc
+#: field:fpoc.configuration,model:0
+msgid "Model"
+msgstr "Modelo"
+
+#. module: fpoc
+#: view:fpoc.fiscal_printer:fpoc.view_fiscal_printer_fiscal_printer_filter
+msgid "By Attribute"
+msgstr "Por atributo"
+
+#. module: fpoc
+#: view:fpoc.fiscal_printer:fpoc.view_fiscal_printer_fiscal_printer_filter
+msgid "By object"
+msgstr "Por objeto"
+
+#. module: fpoc
+#: selection:fpoc.fiscal_printer,fiscalStatus:0
+msgid "Close"
+msgstr "Cerca"
+
+#. module: fpoc
+#: field:fpoc.fiscal_printer,fiscal_config_id:0
+msgid "Configuration"
+msgstr "Configuración"
+
+#. module: fpoc
+#: code:addons/fpoc/fiscal_printer.py:187
+#, python-format
+msgid "Connectivity Error"
+msgstr "Error de conectividad"
+
+#. module: fpoc
+#: view:fpoc.disconnected:fpoc.view_disconnected_tree
+msgid "Create"
+msgstr "Crear"
+
+#. module: fpoc
+#: field:fpoc.configuration,create_uid:0
+#: field:fpoc.disconnected,create_uid:0
+#: field:fpoc.fiscal_printer,create_uid:0
+msgid "Created by"
+msgstr "Creado por"
+
+#. module: fpoc
+#: field:fpoc.configuration,create_date:0
+#: field:fpoc.disconnected,create_date:0
+#: field:fpoc.fiscal_printer,create_date:0
+msgid "Created on"
+msgstr "Creado en"
+
+#. module: fpoc
+#: model:ir.ui.menu,name:fpoc.menu_disconnected
+msgid "Disconnected"
+msgstr "Desconectado"
+
+#. module: fpoc
+#: view:fpoc.disconnected:fpoc.view_disconnected_tree
+msgid "Disconnected Fiscal Printer"
+msgstr "Impresora Fiscal Desconectada"
+
+#. module: fpoc
+#: model:ir.actions.act_window,name:fpoc.action_disconnected_fiscal_printers
+msgid "Disconnected Fiscal Printers"
+msgstr "Impresoras Fiscales desconectadas"
+
+#. module: fpoc
+#: code:addons/fpoc/controllers/main.py:140
+#: code:addons/fpoc/fiscal_printer_user.py:46
+#: code:addons/fpoc/fiscal_printer_user.py:56
+#, python-format
+msgid "Error!"
+msgstr "Error!"
+
+#. module: fpoc
+#: model:ir.ui.menu,name:fpoc.menu_fiscal_printer_configurations
+msgid "Fiscal Configurations"
+msgstr "Configuraciones Fiscales"
+
+#. module: fpoc
+#: view:fpoc.fiscal_printer:fpoc.view_fiscal_printer_fiscal_printer_filter
+#: view:fpoc.fiscal_printer:fpoc.view_fiscal_printer_fiscal_printer_tree
+#: field:fpoc.user,fiscal_printer_id:0
+msgid "Fiscal Printer"
+msgstr "Impresora Fiscal"
+
+#. module: fpoc
+#: view:fpoc.configuration:fpoc.view_fiscal_printer_configuration_form
+#: view:fpoc.configuration:fpoc.view_fiscal_printer_configuration_tree
+msgid "Fiscal Printer Configuration"
+msgstr "Configuración de la impresora fiscal"
+
+#. module: fpoc
+#: code:addons/fpoc/fiscal_printer.py:94
+#: model:ir.actions.act_window,name:fpoc.action_fiscal_printer_fiscal_printer_fiscal_printers
+#: model:ir.ui.menu,name:fpoc.menu_fiscal_printers
+#: model:ir.ui.menu,name:fpoc.menu_fp_config
+#, python-format
+msgid "Fiscal Printers"
+msgstr "Impresoras Fiscales"
+
+#. module: fpoc
+#: model:ir.actions.act_window,name:fpoc.action_fiscal_printer_configuration
+msgid "Fiscal Printers Configuration"
+msgstr "Configuración de Impresoras Fiscales"
+
+#. module: fpoc
+#: model:ir.model,name:fpoc.model_fpoc_configuration
+msgid "Fiscal printer configuration"
+msgstr "Configuración de la impresora fiscal"
+
+#. module: fpoc
+#: model:ir.model,name:fpoc.model_fpoc_user
+msgid "Fiscal printer user"
+msgstr "Usuario de la impresora fiscal"
+
+#. module: fpoc
+#: field:fpoc.fiscal_printer,fiscalStatus:0
+msgid "Fiscal status"
+msgstr "Estado fiscal"
+
+#. module: fpoc
+#: field:fpoc.configuration,id:0
+#: field:fpoc.disconnected,id:0
+#: field:fpoc.fiscal_printer,id:0
+#: field:fpoc.user,id:0
+msgid "ID"
+msgstr "Identificación"
+
+#. module: fpoc
+#: field:fpoc.fiscal_printer,lastUpdate:0
+msgid "Last Update"
+msgstr "Última actualización"
+
+#. module: fpoc
+#: field:fpoc.configuration,write_uid:0
+#: field:fpoc.disconnected,write_uid:0
+#: field:fpoc.fiscal_printer,write_uid:0
+msgid "Last Updated by"
+msgstr "Última actualización por"
+
+#. module: fpoc
+#: field:fpoc.configuration,write_date:0
+#: field:fpoc.disconnected,write_date:0
+#: field:fpoc.fiscal_printer,write_date:0
+msgid "Last Updated on"
+msgstr "Última actualización en"
+
+#. module: fpoc
+#: field:fpoc.disconnected,name:0
+#: view:fpoc.fiscal_printer:fpoc.view_fiscal_printer_fiscal_printer_filter
+#: field:fpoc.fiscal_printer,name:0
+msgid "Name"
+msgstr "Nombre"
+
+#. module: fpoc
+#: sql_constraint:fpoc.configuration:0
+msgid "Name has to be unique!"
+msgstr "Nombre tiene que ser único!"
+
+#. module: fpoc
+#: selection:fpoc.fiscal_printer,fiscalStatus:0
+msgid "Open"
+msgstr "Abierto"
+
+#. module: fpoc
+#: field:fpoc.fiscal_printer,printerStatus:0
+msgid "Printer status"
+msgstr "Estado de la impresora"
+
+#. module: fpoc
+#: model:ir.model,name:fpoc.model_fpoc_disconnected
+msgid "Printers not connected to the server."
+msgstr "Las impresoras no conectadas al servidor."
+
+#. module: fpoc
+#: field:fpoc.configuration,serial:0
+msgid "Registry Number"
+msgstr "Numero de registro"
+
+#. module: fpoc
+#: view:fpoc.fiscal_printer:fpoc.view_fiscal_printer_fiscal_printer_form
+msgid "Report X"
+msgstr "Informe X"
+
+#. module: fpoc
+#: view:fpoc.fiscal_printer:fpoc.view_fiscal_printer_fiscal_printer_form
+msgid "Report Z"
+msgstr "Informe Z"
+
+#. module: fpoc
+#: field:fpoc.configuration,close_date:0
+msgid "Report Z Last Date"
+msgstr "Última fecha del Informe Z"
+
+#. module: fpoc
+#: field:fpoc.disconnected,user_id:0
+msgid "Responsable"
+msgstr "Responsable"
+
+#. module: fpoc
+#: code:addons/fpoc/fiscal_printer_user.py:46
+#, python-format
+msgid "Selected a printer associated."
+msgstr "Selección de una impresora asociada."
+
+#. module: fpoc
+#: field:fpoc.disconnected,session_id:0
+msgid "Session"
+msgstr "Sesión"
+
+#. module: fpoc
+#: view:fpoc.fiscal_printer:fpoc.view_fiscal_printer_fiscal_printer_form
+msgid "Test"
+msgstr "Prueba"
+
+#. module: fpoc
+#: code:addons/fpoc/controllers/main.py:140
+#: code:addons/fpoc/fiscal_printer_user.py:56
+#, python-format
+msgid "Timeout happen!!"
+msgstr "Tiempo de espera excedido !!"
+
+#. module: fpoc
+#: view:fpoc.fiscal_printer:fpoc.view_fiscal_printer_fiscal_printer_form
+#: model:ir.model,name:fpoc.model_fpoc_fiscal_printer
+#: model:ir.module.category,description:fpoc.module_category_fiscal_printer
+#: model:ir.module.category,name:fpoc.module_category_fiscal_printer
+msgid "fiscal_printer"
+msgstr "Impresora Fiscal"
+
+#. module: fpoc
+#: field:fpoc.fiscal_printer,session_id:0
+msgid "session_id"
+msgstr "Id Sesión"
+
+#. module: fpoc
+#: sql_constraint:fpoc.fiscal_printer:0
+msgid "this printer with this model and serial number yet exists"
+msgstr "Esta impresora con este modelo y número de serie ya existe"
+

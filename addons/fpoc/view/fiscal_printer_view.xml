@@ -38,8 +38,8 @@
                 <form string="fiscal_printer" version="7.0">
                     <field name="allow_z" invisible="1"/>
                     <header>
-                        <button name="report_x" type="object" string="Report X" class="oe_highlight" />
-                        <button name="report_z" type="object" string="Report Z" class="oe_highlight" attrs="{'invisible': [('allow_z','=',False)]}"/>
+                        <button name="report_x" type="object" string="Report X" class="oe_highlight" confirm="Desea Imprimir el Reporte X"/>
+                        <button name="report_z" type="object" string="Report Z" class="oe_highlight" attrs="{'invisible': [('allow_z','=',False)]}" confirm="Desea Imprimir el Reporte Z"/>
                         <button name="short_test" type="object" string="Test"/>
                     </header>
                     <sheet string="fiscal_printer">
