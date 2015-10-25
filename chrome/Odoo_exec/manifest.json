@@ -1,0 +1,45 @@
+{
+  "manifest_version": 2,
+  "name": "Odoo app for TFHKA printers",
+  "short_name": "Odoo_exec",
+  "description": "This app is to allow Odoo from the Cloud to execute local commands to manage TFHKA fiscal printers",
+  "version": "0.0.1",
+  "author": "Axel Mendoza",
+  "icons": {
+    "16": "assets/icon_16.png",
+    "128": "assets/icon_128.png"
+  },
+  "key": "dbkkiplmpfpodpbbfhhkbaciopheegoh",
+  "app": {
+    "background": {
+      "scripts": [
+          "src/cevents.js",
+			    "src/async.js",
+          "src/oerp.js",
+          "src/tools.js",
+          "src/sevents.js",
+			    "src/background.js"
+      ]
+    }
+  },
+  "externally_connectable": {
+     "matches": [
+         "*://localhost:*/*",
+         "*://serverhost:*/*"
+     ]
+  },
+  "permissions": [
+     "*://*/*",
+     "storage",
+     "system.network",
+     "nativeMessaging"
+  ],
+  "sockets": {
+    "tcp": {
+      "connect": "*:*"
+    },
+    "tcpServer": {
+      "listen": "*:*"
+    }
+  }
+}

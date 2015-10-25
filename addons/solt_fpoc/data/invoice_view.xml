@@ -37,7 +37,7 @@
                 <notebook position="inside">
                     <page string="Fiscal Printer" position="inside" attrs="{'invisible': [('use_fiscal_printer','=',False)]}">
                         <group colspan="2" col="2">
-                            <field name='fiscal_printer_id'/>
+                            <field name='fiscal_printer_id' domain="[('printerStatus','=','active')]"/>
                             <field name='fiscal_printer_anon_partner_id'/>
                         </group>
                     </page>

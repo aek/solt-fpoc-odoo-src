@@ -80,9 +80,19 @@ class fpoc_invoice(osv.osv):
         if r and 'error' not in r:
             return True
         else:
-            raise osv.except_osv(_(u'Cancelling Validation'),
-                                 _('Error: %s') % r[0]['response'])
-    
+            if r:
+                raise osv.except_osv(_(u'Cancelling Validation'),
+                                     _('Error: %s') % r[0]['response'])
+            else:
+                raise osv.except_osv(_(u'Cancelling Validation'),
+                                     _('Error: Printer Driver'))
+
+    def _get_default_printer(self, cr, uid, context=None):
+        res = self.pool.get('fpoc.fiscal_printer').search(cr, uid, [('printerStatus', '=', 'active')], context=context)
+        if res:
+            return res[0]
+        return False
+
     _columns = {
         'use_fiscal_printer': fields.boolean('Associated to a fiscal printer'),
         'fiscal_status': fields.selection([('draft','Draft'),('print', 'Print'),('refund', 'Refund')], string="Fiscal Status"),
@@ -91,6 +101,7 @@ class fpoc_invoice(osv.osv):
     _defaults = {
         'fiscal_status': 'draft',
         'use_fiscal_printer': True,
+        'fiscal_printer_id': _get_default_printer,
     }
 fpoc_invoice()
 

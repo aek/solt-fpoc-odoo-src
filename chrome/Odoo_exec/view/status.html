@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <link rel="stylesheet" type="text/css" href="status.css">
+    <link rel="stylesheet" type="text/css" href="../lib/font-awesome-4.2.0/css/font-awesome.css">
+  </head>
+  <body>
+    <div id="overlay" class="container4">
+        <p> <i class="fa fa-spinner fa-spin fa-4x"></i> </p>
+    </div>
+    <div id="alert"></div>
+    <div id="url" class="state_url">
+	    <h1>
+            <span class="fa-stack fa-lg">
+              <i class="fa fa-rocket fa-stack-1x"></i>
+              <i class="fa fa-ban fa-stack-2x text-danger hidden"></i>
+            </span>
+            Connection setup</h1>
+	    <p>Use the same Internet Address that you use to access to Odoo.</p>
+        <datalist id="KnownServers">
+          <option value="http://localhost:8069/" />
+        </datalist>
+        <div class="margin-bottom">
+            <div class="input-group margin-bottom-sm">
+                <span class="input-group-addon"><i class="fa fa-cloud fa-fw"></i></span>
+                <input class="form-control" type="url" name="server" placeholder="http://localhost:8069"/>
+            </div>
+        </div>
+        <div class="margin-bottom">
+            <div>
+                <button class="op" name="select" type="submit">Connect</button>
+            </div>
+        </div>
+    </div>
+    <div id="disconnected" class="state_login">
+	    <h1>
+            <span class="fa-stack fa-lg">
+              <i class="fa fa-info fa-stack-1x"></i>
+              <i class="fa fa-ban fa-stack-2x text-danger hidden"></i>
+            </span>
+            Log in</h1>
+	    <p>Use your user and password to publish your local printers to the selected database.</p>
+        <div class="margin-bottom">
+            <div class="input-group margin-bottom-sm">
+                <span class="input-group-addon"><i class="fa fa-database fa-fw"></i></span>
+                <select class="form-control" name="database"/></select>
+            </div>
+            <div class="input-group margin-bottom-sm">
+                <span class="input-group-addon"><i class="fa fa-user fa-fw"></i></span>
+			    <input class="form-control" type="text" name="login" placeholder="User"/>
+            </div>
+            <div class="input-group margin-bottom-sm">
+                <span class="input-group-addon"><i class="fa fa-key fa-fw"></i></span>
+			    <input class="form-control" type="password" name="password" password="1" placeholder="Password"/>
+            </div>
+        </div>
+        <div class="margin-bottom">
+            </div>
+			    <button class="op" name="login" type="submit">Login</button>
+			    <button class="op" name="cancel">Cancel</button>
+		    </ul>
+	    </div>
+    </div>
+    <div id="connected" class="state_online">
+	    <h1>
+            <span class="fa-stack fa-lg">
+              <i class="fa fa-cloud fa-stack-2x"></i>
+              <i class="fa fa-print fa-stack-1x reverse"></i>
+            </span>
+            Connected</h1>
+        <p>You are logged as <b id="login"></b> on <a target="_blank" id="server">server</a>, using database <b id="database"></b>.</p>
+	    <button class="op" name="logout">Logout</button>
+    </div>
+    <div id="logging" style="display:none">
+	    <h1>Logging</h1>
+        <div id="logger">
+        </div>
+    </div>
+  </body>
+  <script src="../src/async.js"></script>
+  <script src="../src/tools.js"></script>
+  <!--script src="../src/oerp.js"></script-->
+  <script src="status.js"></script>
+</html>
+<!-- vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:
+    -->
