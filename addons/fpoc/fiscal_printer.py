@@ -233,14 +233,32 @@ class fiscal_printer(osv.osv):
         r = {}
         for fp in self.browse(cr, uid, ids):
             lines = [
-                'jR%s'%ticket.get('partner').get('document_number'),#RUC_CEDULA 
-                'jS%s'%ticket.get('partner').get('name'),#NOMBRE RAZON SOCIAL 
-                'j3%s'%ticket.get('partner').get('street', ''),
-                'j4%s'%ticket.get('partner').get('city', ''),
-                'j5%s'%ticket.get('partner').get('country', ''),
-                #'j6%s'%ticket.get('address'),#street
-                #'@Productos',
+                'jR%s'%ticket.get('partner').get('document_number'),#RUC_CEDULA
             ]
+            jindex = 2
+            for elem in (ticket.get('partner').get('name'), ticket.get('partner').get('street', ''), ticket.get('partner').get('city', ''), ticket.get('partner').get('country', '')):
+                head = elem
+                tail = False
+                if len(elem) > 40:
+                    head = elem[:40]
+                    tail = elem[40:]
+                if jindex == 2:
+                    lines.append('jS%s'% head)
+                else:
+                    lines.append('j%s%s'% (jindex,head))
+                jindex += 1
+
+                if tail:
+                    while tail:
+                        head = tail
+                        if len(tail) > 40:
+                            head = tail[:40]
+                            tail = tail[40:]
+                        else:
+                            tail = False
+                        lines.append('j%s%s'% (jindex,head))
+                        jindex += 1
+
             for prod_line in ticket.get('lines'):
                 price = format_value(prod_line.get('unit_price'))
                 price = '0'*(10-len(price)) + price
