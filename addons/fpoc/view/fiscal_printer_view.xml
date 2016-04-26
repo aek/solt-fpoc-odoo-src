@@ -40,6 +40,9 @@
                     <header>
                         <button name="report_x" type="object" string="Report X" class="oe_highlight" confirm="Desea Imprimir el Reporte X"/>
                         <button name="report_z" type="object" string="Report Z" class="oe_highlight" attrs="{'invisible': [('allow_z','=',False)]}" confirm="Desea Imprimir el Reporte Z"/>
+                        <button name="report_x2" type="object" string="Report X2" class="oe_highlight" confirm="Desea Imprimir el Reporte X2"/>
+                        <button name="report_z2" type="object" string="Report Z2" class="oe_highlight" confirm="Desea Imprimir el Reporte Z2"/>
+                        <button name="report_range_wizard" type="object" string="Report Range" class="oe_highlight"/>
                         <button name="short_test" type="object" string="Test"/>
                     </header>
                     <sheet string="fiscal_printer">
@@ -94,6 +97,26 @@
                         <field name="serial" />
                         <field name="close_date" />
                      </group>
+                </form>
+            </field>
+        </record>
+
+        <record id="fiscal_printer_report_range_wizard_form" model="ir.ui.view">
+            <field name="name">Report Date Range Wizard</field>
+            <field name="model">fpoc.report.date.range.wizard</field>
+            <field name="arch" type="xml">
+                <form string="Report Date Range Wizard">
+                    <group>
+                        <group>
+                            <field name="date_start"/>
+                        </group>
+                        <group>
+                            <field name="date_end"/>
+                        </group>
+                    </group>
+                    <footer>
+                        <button name="execute" string="Send" type="object" class="oe_highlight"/>
+                    </footer>
                 </form>
             </field>
         </record>

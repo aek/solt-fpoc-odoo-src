@@ -30,7 +30,7 @@
                 <field name="sent" position="after">
                     <group>
                         <field name='use_fiscal_printer'/>
-                        <field name='internal_number' attrs="{'invisible': ['|',('use_fiscal_printer','=',False),('fiscal_status', '=', 'draft')]}" string="Fiscal Invoice Number"/>
+                        <!--<field name='internal_number' attrs="{'invisible': ['|',('use_fiscal_printer','=',False),('fiscal_status', '=', 'draft')]}" string="Fiscal Invoice Number"/>-->
                         <field name="fiscal_status" widget="statusbar" attrs="{'invisible': [('use_fiscal_printer','=',False)]}"/>
                     </group>
                 </field>

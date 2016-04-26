@@ -104,6 +104,9 @@ class fiscal_printer_disconnected(osv.TransientModel):
 fiscal_printer_disconnected()
 
 class fiscal_printer(osv.osv):
+    _name = 'fpoc.fiscal_printer'
+    _description = 'fiscal_printer'
+
     """
     The fiscal printer entity.
     """
@@ -133,8 +136,6 @@ class fiscal_printer(osv.osv):
                 }
         return r
 
-    _name = 'fpoc.fiscal_printer'
-    _description = 'fiscal_printer'
 
     _columns = {
         'name': fields.char(string='Name', required=True),
@@ -170,11 +171,39 @@ class fiscal_printer(osv.osv):
             do_event('make_report', {'name': fp.name, 'type': 'I0X'}, session_id=fp.session_id, printer_id=fp.name)
         return True
 
+    def report_x2(self, cr, uid, ids, context=None):
+        for fp in self.browse(cr, uid, ids):
+            do_event('make_report', {'name': fp.name, 'type': 'I1X'}, session_id=fp.session_id, printer_id=fp.name)
+        return True
+
     def report_z(self, cr, uid, ids, context=None):
         today = fields.date.context_today(self, cr, uid, context)
         for fp in self.browse(cr, uid, ids):
             do_event('make_report', {'name': fp.name, 'type': 'I0Z'}, session_id=fp.session_id, printer_id=fp.name)
             fp.fiscal_config_id.write({'close_date': today})
+        return True
+
+    def report_z2(self, cr, uid, ids, context=None):
+        today = fields.date.context_today(self, cr, uid, context)
+        for fp in self.browse(cr, uid, ids):
+            do_event('make_report', {'name': fp.name, 'type': 'I1Z'}, session_id=fp.session_id, printer_id=fp.name)
+            fp.fiscal_config_id.write({'close_date': today})
+        return True
+
+    def report_range_wizard(self, cr, uid, ids, context=None):
+        return {
+            'name': 'Range Report',
+            'view_type': 'form',
+            'view_mode': 'form',
+            'res_model': 'fpoc.report.date.range.wizard',
+            #'views': [(view_id, 'form')],
+            'type': 'ir.actions.act_window',
+            'target': 'new',
+        }
+
+    def report_range(self, cr, uid, ids, date_start, date_end, context=None):
+        for fp in self.browse(cr, uid, ids):
+            do_event('make_report', {'name': fp.name, 'type': 'I2A%s%s'%(datetime.strftime(date_start, '%d%m%y'), datetime.strftime(date_end, '%d%m%y'))}, session_id=fp.session_id, printer_id=fp.name)
         return True
 
     def get_state(self, cr, uid, ids, context=None):
