@@ -2,7 +2,7 @@
 {   'active': False,
     'author': 'Moldeo Interactive',
     'category': 'base.module_category_hidden',
-    'depends': [],
+    'depends': ['base','account'],
     'description': 'Fiscal Printer on the Cloud',
     'installable': True,
     'license': 'AGPL-3',

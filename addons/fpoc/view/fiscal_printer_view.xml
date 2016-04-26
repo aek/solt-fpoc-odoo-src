@@ -43,6 +43,7 @@
                         <button name="report_x2" type="object" string="Report X2" class="oe_highlight" confirm="Desea Imprimir el Reporte X2"/>
                         <button name="report_z2" type="object" string="Report Z2" class="oe_highlight" confirm="Desea Imprimir el Reporte Z2"/>
                         <button name="report_range_wizard" type="object" string="Report Range" class="oe_highlight"/>
+                        <button name="fiscal_set_payment_codes" type="object" string="Set Payment Codes" class="oe_highlight"/>
                         <button name="short_test" type="object" string="Test"/>
                     </header>
                     <sheet string="fiscal_printer">
@@ -122,6 +123,16 @@
         </record>
 
 
+        <record id="fiscal_printer_journal_code_form" model="ir.ui.view">
+            <field name="name">Journal Fiscal Code</field>
+            <field name="model">account.journal</field>
+            <field name="inherit_id" ref="account.view_account_journal_form"/>
+            <field name="arch" type="xml">
+                <field name="type" position="after">
+                    <field name="fiscal_printer_code"/>
+                </field>
+            </field>
+        </record>
     </data>
 </openerp>
 <!-- vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4

@@ -206,6 +206,14 @@ class fiscal_printer(osv.osv):
             do_event('make_report', {'name': fp.name, 'type': 'I2A%s%s'%(datetime.strftime(date_start, '%d%m%y'), datetime.strftime(date_end, '%d%m%y'))}, session_id=fp.session_id, printer_id=fp.name)
         return True
 
+    def fiscal_set_payment_codes(self, cr, uid, ids, date_start, date_end, context=None):
+        journal_ids = self.pool.get('account.journal').search(cr, uid, [('fiscal_printer_code', '!=', False)], context=context)
+        journal_data = [(j.code, j.name) for j in self.browse(cr, ui, journal_ids, context=context)]
+        for fp in self.browse(cr, uid, ids):
+            for data in journal_data:
+                do_event('make_report', {'name': fp.name, 'type': 'PE%s%s' % data}, session_id=fp.session_id, printer_id=fp.name)
+        return True
+
     def get_state(self, cr, uid, ids, context=None):
         r = {}
         for fp in self.browse(cr, uid, ids):
@@ -344,5 +352,12 @@ class fiscal_printer(osv.osv):
         return r
     
 fiscal_printer()
+
+class fpoc_journal(osv.osv):
+    _inherit = 'account.journal'
+
+    _columns = {
+        'fiscal_printer_code': fields.char('Fiscal Printer Code'),
+    }
 
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:
