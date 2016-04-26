@@ -1,7 +1,7 @@
 {
   "name": "solt.native.odoo.exec",
   "description": "Native Odoo Exec",
-  "path": "/opt/chrome/odoo_exec.py",
+  "path": "C:\\opt\\chrome\\odoo_exec.py",
   "type": "stdio",
   "allowed_origins": [
     "chrome-extension://gjhmccleofjjoapghhljicmngapfeibb/"
