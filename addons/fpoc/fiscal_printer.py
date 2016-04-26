@@ -305,6 +305,12 @@ class fiscal_printer(osv.osv):
                 if prod_line.get('discount', False):
                     discount = format_value(prod_line.get('discount'))
                     lines.append('p-%s'%discount)
+            if len(ticket.get('lines')) > 1:
+                for pay in ticket.get('payments'):
+                    lines.append("2%s%s"%pay)
+            else:
+                pay = ticket.get('payments')[0]
+                lines.append("1%s" % pay[0])
             lines.append('@Gracias por su visita')
             lines.append('101')
             

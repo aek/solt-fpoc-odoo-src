@@ -44,6 +44,7 @@ class fpoc_invoice(osv.osv):
 
         for inv in self.browse(cr, uid, ids, context):
             if inv.use_fiscal_printer:
+                payments = [(pay.journal_id.fiscal_printer_code, pay.credit) for pay in inv.payment_ids if pay.journal_id.fiscal_printer_code]
                 ticket={
                     "debit_note": False,
                     "partner": {
@@ -55,6 +56,7 @@ class fpoc_invoice(osv.osv):
                     },
                     'internal_number': inv.internal_number, 
                     "lines": [ ],
+                    "payments": payments,
                     "salesman": _("Saleman: %s") % inv.user_id.name if inv.user_id.name else "",
                 }
                 for line in inv.invoice_line:
