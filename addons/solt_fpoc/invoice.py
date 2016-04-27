@@ -44,7 +44,21 @@ class fpoc_invoice(osv.osv):
 
         for inv in self.browse(cr, uid, ids, context):
             if inv.use_fiscal_printer:
-                payments = [(pay.journal_id.fiscal_printer_code, pay.credit) for pay in inv.payment_ids if pay.journal_id.fiscal_printer_code]
+                def format_value(value):
+                    value = str(value)
+                    value = value.replace(',', '.')
+                    value = value.split('.')
+                    if len(value) == 1:
+                        value.append('00')
+                    else:
+                        if len(value[1]) > 2:
+                            value[1] = value[1][:1]
+                        elif len(value[1]) == 1:
+                            value[1] = value[1] + '0'
+                    price = ''.join(value)
+                    return '0' * (10 - len(price)) + price
+
+                payments = [(pay.journal_id.fiscal_printer_code, format_value(pay.credit)) for pay in inv.payment_ids if pay.journal_id.fiscal_printer_code]
                 partner_id = inv.partner_id
                 while not partner_id.is_company and partner_id.parent_id:
                     partner_id = partner_id.parent_id
