@@ -208,7 +208,7 @@ class fiscal_printer(osv.osv):
 
     def fiscal_set_payment_codes(self, cr, uid, ids, context=None):
         journal_ids = self.pool.get('account.journal').search(cr, uid, [('fiscal_printer_code', '!=', False)], context=context)
-        journal_data = [(j.code, j.name) for j in self.pool.get('account.journal').browse(cr, uid, journal_ids, context=context)]
+        journal_data = [(j.fiscal_printer_code, j.name) for j in self.pool.get('account.journal').browse(cr, uid, journal_ids, context=context)]
         for fp in self.browse(cr, uid, ids):
             for data in journal_data:
                 do_event('make_report', {'name': fp.name, 'type': 'PE%s%s' % data}, session_id=fp.session_id, printer_id=fp.name)
@@ -311,7 +311,7 @@ class fiscal_printer(osv.osv):
             else:
                 pay = ticket.get('payments')[0]
                 lines.append("1%s" % pay[0])
-            lines.append('@Gracias por su visita')
+            lines.append('j%sGracias por su visita'%jindex)
             
             event_result = do_event('make_ticket', {'name': fp.name, 'lines': lines}, session_id=fp.session_id, printer_id=fp.name)
             r[fp.id] = event_result
@@ -333,13 +333,34 @@ class fiscal_printer(osv.osv):
         r = {}
         for fp in self.browse(cr, uid, ids):
             lines = [
-                'jR%s'%ticket.get('partner').get('document_number'),#RUC_CEDULA 
-                'jS%s'%ticket.get('partner').get('name'),#NOMBRE RAZON SOCIAL 
-                'j3%s'%ticket.get('partner').get('street', ''),
-                'j4%s'%ticket.get('partner').get('city', ''),
-                'j5%s'%ticket.get('partner').get('country', ''),
-                'jF%s-%s'%(fp.fiscal_config_id.serial, ticket.get('internal_number')),
+                'jR%s'%ticket.get('partner').get('document_number'),#RUC_CEDULA
             ]
+            jindex = 2
+            for elem in (ticket.get('partner').get('name'), ticket.get('partner').get('street', ''),
+                         ticket.get('partner').get('city', ''), ticket.get('partner').get('country', ''),
+                         'jF%s-%s' % (fp.fiscal_config_id.serial, ticket.get('internal_number'))):
+                head = elem
+                tail = False
+                if len(elem) > 40:
+                    head = elem[:40]
+                    tail = elem[40:]
+                if jindex == 2:
+                    lines.append('jS%s' % head)
+                else:
+                    lines.append('j%s%s' % (jindex, head))
+                jindex += 1
+
+                if tail:
+                    while tail:
+                        head = tail
+                        if len(tail) > 40:
+                            head = tail[:40]
+                            tail = tail[40:]
+                        else:
+                            tail = False
+                        lines.append('j%s%s' % (jindex, head))
+                        jindex += 1
+
             for prod_line in ticket.get('lines'):
                 price = format_value(prod_line.get('unit_price'))
                 price = '0'*(10-len(price)) + price
@@ -355,7 +376,7 @@ class fiscal_printer(osv.osv):
             else:
                 pay = ticket.get('payments')[0]
                 lines.append("1%s" % pay[0])
-            lines.append('@Gracias por su visita')
+            lines.append('j%sGracias por su visita' % jindex)
 
             
             event_result = do_event('make_ticket', {'name': fp.name, 'lines': lines}, session_id=fp.session_id, printer_id=fp.name)
