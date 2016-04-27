@@ -305,14 +305,13 @@ class fiscal_printer(osv.osv):
                 if prod_line.get('discount', False):
                     discount = format_value(prod_line.get('discount'))
                     lines.append('p-%s'%discount)
-            if len(ticket.get('lines')) > 1:
+            if len(ticket.get('payments')) > 1:
                 for pay in ticket.get('payments'):
                     lines.append("2%s%s"%pay)
             else:
                 pay = ticket.get('payments')[0]
                 lines.append("1%s" % pay[0])
             lines.append('@Gracias por su visita')
-            lines.append('101')
             
             event_result = do_event('make_ticket', {'name': fp.name, 'lines': lines}, session_id=fp.session_id, printer_id=fp.name)
             r[fp.id] = event_result
@@ -350,8 +349,14 @@ class fiscal_printer(osv.osv):
                 if prod_line.get('discount', False):
                     discount = format_value(prod_line.get('discount'))
                     lines.append('p-%s'%discount)
+            if len(ticket.get('payments')) > 1:
+                for pay in ticket.get('payments'):
+                    lines.append("2%s%s" % pay)
+            else:
+                pay = ticket.get('payments')[0]
+                lines.append("1%s" % pay[0])
             lines.append('@Gracias por su visita')
-            lines.append('101')
+
             
             event_result = do_event('make_ticket', {'name': fp.name, 'lines': lines}, session_id=fp.session_id, printer_id=fp.name)
             r[fp.id] = event_result.pop() if event_result else False
