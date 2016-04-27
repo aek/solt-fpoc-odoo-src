@@ -45,14 +45,18 @@ class fpoc_invoice(osv.osv):
         for inv in self.browse(cr, uid, ids, context):
             if inv.use_fiscal_printer:
                 payments = [(pay.journal_id.fiscal_printer_code, pay.credit) for pay in inv.payment_ids if pay.journal_id.fiscal_printer_code]
+                partner_id = inv.partner_id
+                while not partner_id.is_company and partner_id.parent_id:
+                    partner_id = partner_id.parent_id
+
                 ticket={
                     "debit_note": False,
                     "partner": {
-                        "name": inv.partner_id.name or '',
-                        "street": inv.partner_id.street or '',
-                        "city": inv.partner_id.city or '',
-                        "country": inv.partner_id.country_id.name or '',
-                        "document_number": inv.partner_id.curp,
+                        "name": partner_id.display_name or '',
+                        "street": partner_id.street or '',
+                        "city": partner_id.city or '',
+                        "country": partner_id.country_id.name or '',
+                        "document_number": partner_id.curp,
                     },
                     'internal_number': inv.internal_number, 
                     "lines": [ ],
