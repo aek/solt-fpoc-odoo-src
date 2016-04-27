@@ -208,7 +208,7 @@ class fiscal_printer(osv.osv):
 
     def fiscal_set_payment_codes(self, cr, uid, ids, context=None):
         journal_ids = self.pool.get('account.journal').search(cr, uid, [('fiscal_printer_code', '!=', False)], context=context)
-        journal_data = [(j.code, j.name) for j in self.browse(cr, ui, journal_ids, context=context)]
+        journal_data = [(j.code, j.name) for j in self.browse(cr, uid, journal_ids, context=context)]
         for fp in self.browse(cr, uid, ids):
             for data in journal_data:
                 do_event('make_report', {'name': fp.name, 'type': 'PE%s%s' % data}, session_id=fp.session_id, printer_id=fp.name)
