@@ -9,7 +9,7 @@
             <field name="arch" type="xml">
                 <button name="invoice_refund" position="after">
                     <field name="fiscal_status" invisible="1"/>
-                    <span attrs="{'invisible': [('fiscal_status', 'in', ('draft','refund'))]}">
+                    <span attrs="{'invisible': [('fiscal_status', 'in', (False,'','draft','refund'))]}">
                         <button string='Create Fiscal Refund' name="action_fiscal_refund" type="object" class="oe_highlight"/>
                         or
                     </span>
