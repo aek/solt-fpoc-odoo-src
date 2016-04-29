@@ -38,8 +38,7 @@ class fpoc_invoice(osv.osv):
     def action_fiscal_printer(self, cr, uid, ids, context=None):
         r = {}
         if len(ids) > 1:
-            raise osv.except_osv(_(u'Cancelling Validation'),
-                                 _(u'Please, validate one ticket at time.'))
+            raise osv.except_osv(_('Validation'),_('Please, validate one ticket at time.'))
             return False
 
         for inv in self.browse(cr, uid, ids, context):
@@ -95,6 +94,9 @@ class fpoc_invoice(osv.osv):
                 if r:
                     _logger.info('Respuesta de la Impresora: %s'%str(r))
                     if context.get('fiscal', False) and r[0].get('response',{}).get('id', False):
+                        inv_count = self.search(cr, uid, [('internal_number', '=', r[0].get('response',{}).get('id'))], count=True)
+                        if inv_count:
+                            raise osv.except_osv(_('Validation'),_('Error: The invoice was not printed. Check if the fiscal Printer is connected'))
                         inv.write({'internal_number': r[0]['response']['id'], 'fiscal_status': 'print'})
                     elif context.get('fiscal_refund', False):
                         inv.write({'fiscal_status': 'refund'})
@@ -102,11 +104,9 @@ class fpoc_invoice(osv.osv):
             return True
         else:
             if r:
-                raise osv.except_osv(_(u'Cancelling Validation'),
-                                     _('Error: %s') % r[0]['response'])
+                raise osv.except_osv(_('Validation'),_('Error: %s') % r[0]['response'])
             else:
-                raise osv.except_osv(_(u'Cancelling Validation'),
-                                     _('Error: Printer Driver'))
+                raise osv.except_osv(_('Validation'),_('Error: Printer not Connected'))
 
     def _get_default_printer(self, cr, uid, context=None):
         res = self.pool.get('fpoc.fiscal_printer').search(cr, uid, [('printerStatus', '=', 'active')], context=context)

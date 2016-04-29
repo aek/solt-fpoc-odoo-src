@@ -29,8 +29,8 @@ msgstr "Asociado a una impresora fiscal"
 #: code:addons/solt_fpoc/invoice.py:41
 #: code:addons/solt_fpoc/invoice.py:83
 #, python-format
-msgid "Cancelling Validation"
-msgstr "Validación de Cancelación"
+msgid "Validation"
+msgstr "Validación"
 
 #. module: solt_fpoc
 #: selection:account.invoice,fiscal_status:0
@@ -38,10 +38,22 @@ msgid "Draft"
 msgstr "Borrador"
 
 #. module: solt_fpoc
-#: code:addons/solt_fpoc/invoice.py:84
+#: code:addons/solt_fpoc/invoice.py:107
 #, python-format
 msgid "Error: %s"
 msgstr "Error: %s"
+
+#. module: solt_fpoc
+#: code:addons/solt_fpoc/invoice.py:99
+#, python-format
+msgid "Error: The invoice was not printed. Check if the fiscal Printer is connected"
+msgstr "Error: La factura no imprimió. Chequee si la impresora fiscal está conectada"
+
+#. module: solt_fpoc
+#: code:addons/solt_fpoc/invoice.py:109
+#, python-format
+msgid "Error: Printer not Connected"
+msgstr "Error: La impresora fiscal no está conectada"
 
 #. module: solt_fpoc
 #: view:account.invoice:solt_fpoc.view_account_invoice_fop_form
