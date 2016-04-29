@@ -33,8 +33,8 @@ class fpoc_report_date_range_wizard(osv.TransientModel):
         for wz in self.browse(cr, uid, ids, context=context):
             type = '%s0%s0%s'%(
                 wz.type,
-                datetime.strftime(datetime.strptime(wz.date_start, DEFAULT_SERVER_DATE_FORMAT), '%d%m%y'),
-                datetime.strftime(datetime.strptime(wz.date_end, DEFAULT_SERVER_DATE_FORMAT), '%d%m%y')
+                datetime.strftime(datetime.strptime(wz.date_start, DEFAULT_SERVER_DATE_FORMAT), '%y%m%d'),
+                datetime.strftime(datetime.strptime(wz.date_end, DEFAULT_SERVER_DATE_FORMAT), '%y%m%d')
             )
             self.pool.get('fpoc.fiscal_printer').report_range(cr, uid, context.get('active_id'), type)
         return True
