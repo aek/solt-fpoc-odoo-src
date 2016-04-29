@@ -127,8 +127,8 @@
                 <form string="Report Number Range Wizard">
                     <group>
                         <field name="type"/>
-                        <field name="number_start" widget="integer"/>
-                        <field name="number_end" widget="integer"/>
+                        <field name="number_start"/>
+                        <field name="number_end"/>
                     </group>
                     <footer>
                         <button name="execute" string="Send" type="object" class="oe_highlight"/>
