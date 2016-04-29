@@ -64,6 +64,7 @@ class fpoc_invoice(osv.osv):
                     partner_id = partner_id.parent_id
 
                 ticket={
+                    "ref": inv.number,
                     "debit_note": False,
                     "partner": {
                         "name": partner_id.display_name or '',

@@ -307,6 +307,8 @@ class fiscal_printer(osv.osv):
                     lines.append('p-%s'%discount)
 
             lines.append('j0Gracias por su visita')
+            lines.append('j1Ref.Interna %s' % ticket.get('ref'))
+
             if len(ticket.get('payments')) > 1:
                 for pay in ticket.get('payments'):
                     lines.append("2%s%s"%pay)
@@ -339,9 +341,10 @@ class fiscal_printer(osv.osv):
                 'jR%s'%ticket.get('partner').get('document_number'),#RUC_CEDULA
             ]
             jindex = 2
-            for elem in (ticket.get('partner').get('name'), ticket.get('partner').get('street', ''),
-                         ticket.get('partner').get('city', ''), ticket.get('partner').get('country', ''),
-                         'jF%s-%s' % (fp.fiscal_config_id.serial, ticket.get('internal_number'))):
+            for elem in (
+                ticket.get('partner').get('name'), ticket.get('partner').get('street', ''),
+                ticket.get('partner').get('city', ''), ticket.get('partner').get('country', ''),
+            ):
                 head = elem
                 tail = False
                 if len(elem) > 40:
@@ -363,6 +366,7 @@ class fiscal_printer(osv.osv):
                             tail = False
                         lines.append('j%s%s' % (jindex, head))
                         jindex += 1
+            lines.append('jF%s-%s' % (fp.fiscal_config_id.serial, ticket.get('internal_number')))
 
             for prod_line in ticket.get('lines'):
                 price = format_value(prod_line.get('unit_price'))
@@ -374,6 +378,8 @@ class fiscal_printer(osv.osv):
                     discount = format_value(prod_line.get('discount'))
                     lines.append('p-%s'%discount)
             lines.append('j0Gracias por su visita')
+            lines.append('j1Ref.Interna %s'%ticket.get('ref'))
+
             if len(ticket.get('payments')) > 1:
                 for pay in ticket.get('payments'):
                     lines.append("2%s%s" % pay)
