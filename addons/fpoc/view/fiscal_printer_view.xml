@@ -109,12 +109,9 @@
             <field name="arch" type="xml">
                 <form string="Report Date Range Wizard">
                     <group>
-                        <group>
-                            <field name="date_start"/>
-                        </group>
-                        <group>
-                            <field name="date_end"/>
-                        </group>
+                        <field name="type"/>
+                        <field name="date_start"/>
+                        <field name="date_end"/>
                     </group>
                     <footer>
                         <button name="execute" string="Send" type="object" class="oe_highlight"/>
@@ -129,12 +126,9 @@
             <field name="arch" type="xml">
                 <form string="Report Number Range Wizard">
                     <group>
-                        <group>
-                            <field name="number_start" widget="integer"/>
-                        </group>
-                        <group>
-                            <field name="number_end" widget="integer"/>
-                        </group>
+                        <field name="type"/>
+                        <field name="number_start" widget="integer"/>
+                        <field name="number_end" widget="integer"/>
                     </group>
                     <footer>
                         <button name="execute" string="Send" type="object" class="oe_highlight"/>
