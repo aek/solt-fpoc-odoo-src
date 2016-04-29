@@ -190,9 +190,9 @@ class fiscal_printer(osv.osv):
             fp.fiscal_config_id.write({'close_date': today})
         return True
 
-    def report_range_wizard(self, cr, uid, ids, context=None):
+    def report_date_range_wizard(self, cr, uid, ids, context=None):
         return {
-            'name': 'Range Report',
+            'name': 'Date Range Report',
             'view_type': 'form',
             'view_mode': 'form',
             'res_model': 'fpoc.report.date.range.wizard',
@@ -201,9 +201,20 @@ class fiscal_printer(osv.osv):
             'target': 'new',
         }
 
-    def report_range(self, cr, uid, ids, date_start, date_end, context=None):
+    def report_number_range_wizard(self, cr, uid, ids, context=None):
+        return {
+            'name': 'Number Range Report',
+            'view_type': 'form',
+            'view_mode': 'form',
+            'res_model': 'fpoc.report.number.range.wizard',
+            # 'views': [(view_id, 'form')],
+            'type': 'ir.actions.act_window',
+            'target': 'new',
+        }
+
+    def report_range(self, cr, uid, ids, type, context=None):
         for fp in self.browse(cr, uid, ids):
-            do_event('make_report', {'name': fp.name, 'type': 'I2A%s%s'%(datetime.strftime(date_start, '%d%m%y'), datetime.strftime(date_end, '%d%m%y'))}, session_id=fp.session_id, printer_id=fp.name)
+            do_event('make_report', {'name': fp.name, 'type': type}, session_id=fp.session_id, printer_id=fp.name)
         return True
 
     def fiscal_set_payment_codes(self, cr, uid, ids, context=None):

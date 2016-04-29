@@ -10,6 +10,10 @@ import json
 
 from tempfile import NamedTemporaryFile
 
+if sys.platform == "win32":
+    import os, msvcrt
+    msvcrt.setmode(sys.stdout.fileno(), os.O_BINARY)
+
 utility_path = 'C:/IntTFHKA/IntTFHKA'
 
 def wait_lock():
@@ -47,11 +51,9 @@ def check_printer():
         send_response({'error': 'Printer not connected'})
 
 def make_status(status):
-    report = NamedTemporaryFile( suffix=".tmp", prefix="tmp__odoo_exec__", delete=False )
-    report.close()
-    proc = Popen([utility_path, 'UploadStatusCmd(%s)'% status, report.name], stdout=PIPE, stderr=PIPE)
+    proc = Popen([utility_path, 'UploadStatusCmd(%s)'% status], stdout=PIPE, stderr=PIPE)
     print_out, check_err = proc.communicate()
-    status_file = open(report.name,'rb')
+    status_file = open('C:/IntTFHKA/Status.txt','rb')
     status_out = status_file.read()[21:29]
     status_file.close()
     return status_out
@@ -76,6 +78,9 @@ def make_ticket(lines):
 
 def make_report(report_type):
     check_printer()
+    log = open('C:/opt/chrome/odoo_exec.log', 'w')
+    log.write(report_type)
+    log.close()
     proc = Popen([utility_path, 'SendCmd(%s)'% report_type], stdout=PIPE, stderr=PIPE)
     report_out, check_err = proc.communicate()
     report_dict = {'Retorno:': report_out}
@@ -84,7 +89,7 @@ def make_report(report_type):
 if __name__ == '__main__':
     text_length_bytes = sys.stdin.read(4)
     if len(text_length_bytes) == 0:
-      sys.exit(0)
+        sys.exit(0)
     text_length = struct.unpack('i', text_length_bytes)[0]
     
     # Read the text (JSON object) of the message.
