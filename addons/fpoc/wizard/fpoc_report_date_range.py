@@ -31,7 +31,8 @@ class fpoc_report_date_range_wizard(osv.TransientModel):
 
     def execute(self, cr, uid, ids, context=None):
         for wz in self.browse(cr, uid, ids, context=context):
-            type = 'I2A%s%s'%(
+            type = '%s0%s0%s'%(
+                wz.type,
                 datetime.strftime(datetime.strptime(wz.date_start, DEFAULT_SERVER_DATE_FORMAT), '%d%m%y'),
                 datetime.strftime(datetime.strptime(wz.date_end, DEFAULT_SERVER_DATE_FORMAT), '%d%m%y')
             )
