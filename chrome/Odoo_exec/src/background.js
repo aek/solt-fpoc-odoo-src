@@ -59,14 +59,16 @@ function login(callback) {
             console.log("Successful login.");
             chrome.storage.local.set({
                 server: session.server,
-                session_id: session.session_id, });
-                session.init_server_events(control_server_events);
+                session_id: session.session_id
+            });
+            session.init_server_events(control_server_events);
         });
         session.addListener('logout', function(s) {
             console.debug("[SES] Logout.");
             chrome.storage.local.set({
                 server: null,
-                session_id: null, });
+                session_id: null
+            });
             session.session_id = null;
 
         });
@@ -81,7 +83,6 @@ function login(callback) {
         });
         session.addListener('error', function(s) {
             console.debug("[SES] Session error. Forget session_id.");
-            for (var i in session.receptor) session.receptor[i].close();
             chrome.storage.local.set({
                 'server': session.server,
                 'session_id': null
@@ -92,7 +93,6 @@ function login(callback) {
         });
         session.addListener('expired', function(s) {
             console.debug("[SES] Session expired. Forget session_id.");
-            for (var i in session.receptor) session.receptor[i].close();
             chrome.storage.local.set({
                 'server': session.server,
                 'session_id': null
@@ -126,7 +126,7 @@ login(function(){
     });
     chrome.app.runtime.onRestarted.addListener(function(){
         console.debug("[SYS] Restart");
-        session.clean_server_events();
+        //session.clean_server_events();
     });
 });
 

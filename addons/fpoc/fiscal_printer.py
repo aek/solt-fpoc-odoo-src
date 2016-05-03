@@ -1,34 +1,8 @@
 # -*- coding: utf-8 -*-
-##############################################################################
-#
-#    fiscal_printer
-#    Copyright (C) 2014 No author.
-#    No email
-#
-#    This program is free software: you can redistribute it and/or modify
-#    it under the terms of the GNU Affero General Public License as
-#    published by the Free Software Foundation, either version 3 of the
-#    License, or (at your option) any later version.
-#
-#    This program is distributed in the hope that it will be useful,
-#    but WITHOUT ANY WARRANTY; without even the implied warranty of
-#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#    GNU Affero General Public License for more details.
-#
-#    You should have received a copy of the GNU Affero General Public License
-#    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-#
-##############################################################################
 
-import re
-from openerp import netsvc
 from openerp.osv import osv, fields
 from openerp.tools.translate import _
-
-from controllers.main import do_event
-from datetime import datetime
-
-from controllers.main import DenialService
+import simplejson
 
 itbms = {'0': ' ','7': '!','10': '"'}
 itbms_ref = {'0': '0','7': '1','10': '2'}
@@ -45,38 +19,6 @@ class fiscal_printer_disconnected(osv.TransientModel):
         'session_id': fields.char(string='Session'),
         'user_id': fields.many2one('res.users', string='Responsable'),
     }
-
-    def _update_(self, cr, uid, force=True, context=None):
-        cr.execute('SELECT COUNT(*) FROM %s' % self._table)
-        count = cr.fetchone()[0]
-        if not force and count > 0:
-            return 
-        if count > 0:
-            cr.execute('DELETE FROM %s' % self._table)
-        t_fp_obj = self.pool.get('fpoc.fiscal_printer')
-        R = do_event('list_printers', control=True)
-        w_wfp_ids = []
-        i = 0
-        for resp in R:
-            if not resp: continue
-            for p in resp['printers']:
-                if t_fp_obj.search(cr, uid, [("name", "=", p['name'])]):
-                    pass
-                else:
-                    values = {
-                        'name': p['name'],
-                        'session_id': p['sid'],
-                        'user_id': p['uid'],
-                    }
-                    pid = self.create(cr, uid, values)
-
-    def search(self, cr, uid, args, offset=0, limit=None, order=None, context=None, count=False):
-        self._update_(cr, uid, force=True)
-        return super(fiscal_printer_disconnected, self).search(cr, uid, args, offset=offset, limit=limit, order=order, context=context, count=count)
-
-    def read(self, cr, uid, ids, fields=None, context=None, load='_classic_read'):
-        self._update_(cr, uid, force=False)
-        return super(fiscal_printer_disconnected, self).read(cr, uid, ids, fields=fields, context=context, load=load)
 
     def create_fiscal_printer(self, cr, uid, ids, context=None):
         """
@@ -121,19 +63,11 @@ class fiscal_printer(osv.osv):
         return res
     
     def _get_status(self, cr, uid, ids, field_name, arg, context=None):
-        s = self.get_state(cr, uid, ids, context)
         r = {}
         for p_id in ids:
-            if s[p_id]:
-                r[p_id] = {
-                    'printerStatus': s[p_id].get('strPrinterStatus', 'Unknown'),
-                    'fiscalStatus': s[p_id].get('strFiscalStatus', 'open'),
-                }
-            else:
-                r[p_id]= {
-                    'printerStatus':'Offline',
-                    'fiscalStatus': 'open',
-                }
+            r[p_id] = {
+                'printerStatus': 'active',
+            }
         return r
 
 
@@ -163,30 +97,30 @@ class fiscal_printer(osv.osv):
                 '800VENDEDOR: ADMINISTRADOR ADMIN',
                 '810',
             ]
-            do_event('make_ticket', {'name': fp.name, 'lines': lines}, session_id=fp.session_id, printer_id=fp.name)
+            self.pool.get('fpoc.event').create(cr, uid, {'name': 'make_ticket', 'data': simplejson.dumps(lines), 'printer_id': fp.id}, context=context)
         return True
 
     def report_x(self, cr, uid, ids, context=None):
         for fp in self.browse(cr, uid, ids):
-            do_event('make_report', {'name': fp.name, 'type': 'I0X'}, session_id=fp.session_id, printer_id=fp.name)
+            self.pool.get('fpoc.event').create(cr, uid, {'name': 'make_report', 'data': "I0X",'printer_id': fp.id}, context=context)
         return True
 
     def report_x2(self, cr, uid, ids, context=None):
         for fp in self.browse(cr, uid, ids):
-            do_event('make_report', {'name': fp.name, 'type': 'I1X'}, session_id=fp.session_id, printer_id=fp.name)
+            self.pool.get('fpoc.event').create(cr, uid, {'name': 'make_report', 'data': "I1X", 'printer_id': fp.id},context=context)
         return True
 
     def report_z(self, cr, uid, ids, context=None):
         today = fields.date.context_today(self, cr, uid, context)
         for fp in self.browse(cr, uid, ids):
-            do_event('make_report', {'name': fp.name, 'type': 'I0Z'}, session_id=fp.session_id, printer_id=fp.name)
+            self.pool.get('fpoc.event').create(cr, uid, {'name': 'make_report', 'data': "I0Z", 'printer_id': fp.id},context=context)
             fp.fiscal_config_id.write({'close_date': today})
         return True
 
     def report_z2(self, cr, uid, ids, context=None):
         today = fields.date.context_today(self, cr, uid, context)
         for fp in self.browse(cr, uid, ids):
-            do_event('make_report', {'name': fp.name, 'type': 'I1Z'}, session_id=fp.session_id, printer_id=fp.name)
+            self.pool.get('fpoc.event').create(cr, uid, {'name': 'make_report', 'data': "I1Z", 'printer_id': fp.id},context=context)
             fp.fiscal_config_id.write({'close_date': today})
         return True
 
@@ -214,7 +148,7 @@ class fiscal_printer(osv.osv):
 
     def report_range(self, cr, uid, ids, type, context=None):
         for fp in self.browse(cr, uid, ids):
-            do_event('make_report', {'name': fp.name, 'type': type}, session_id=fp.session_id, printer_id=fp.name)
+            self.pool.get('fpoc.event').create(cr, uid, {'name': 'make_report', 'data': type, 'printer_id': fp.id},context=context)
         return True
 
     def fiscal_set_payment_codes(self, cr, uid, ids, context=None):
@@ -222,48 +156,47 @@ class fiscal_printer(osv.osv):
         journal_data = [(j.fiscal_printer_code, j.name) for j in self.pool.get('account.journal').browse(cr, uid, journal_ids, context=context)]
         for fp in self.browse(cr, uid, ids):
             for data in journal_data:
-                do_event('make_report', {'name': fp.name, 'type': 'PE%s%s' % data}, session_id=fp.session_id, printer_id=fp.name)
+                self.pool.get('fpoc.event').create(cr, uid, {'name': 'make_report', 'data': 'PE%s%s' % data, 'printer_id': fp.id},context=context)
         return True
 
-    def get_state(self, cr, uid, ids, context=None):
-        r = {}
-        for fp in self.browse(cr, uid, ids):
-            try:
-                event_result = do_event('get_status', {'name': fp.name},
-                     session_id=fp.session_id, printer_id=fp.name)
-            except DenialService, m:
-                raise osv.except_osv(_('Connectivity Error'), m)
-            r[fp.id] = event_result.pop() if event_result else False
-        return r
-
-    # def make_non_fiscal_ticket(self, cr, uid, ids, ticket={}, context=None):
+    # def get_state(self, cr, uid, ids, context=None):
     #     r = {}
     #     for fp in self.browse(cr, uid, ids):
-    #         lines = [
-    #             '80$%s'%ticket.get('partner').get('name'),#NOMBRE RAZON SOCIAL
-    #             '800%s'%ticket.get('partner').get('document_number'),#RUC_CEDULA
-    #             '800%s'%ticket.get('partner').get('street', ''),
-    #             '800%s'%ticket.get('partner').get('city', ''),
-    #             '800%s'%ticket.get('partner').get('country', ''),
-    #             '800-------------------------',
-    #         ]
-    #         total = 0
-    #
-    #         for prod_line in ticket.get('lines'):
-    #             price = prod_line.get('unit_price') * prod_line.get('quantity')
-    #             price = price - (price * prod_line.get('discount')/100)
-    #             total += price
-    #             lines.append('80*%s[%s] B/. %s'%(prod_line.get('item_name'), prod_line.get('unit_price'), prod_line.get('quantity')))
-    #             if prod_line.get('discount', False):
-    #                 lines.append('800Descuento:%s'%prod_line.get('discount'))
-    #         lines.append('800-------------------------')
-    #         lines.append('80*Total B/. %s'%total)
-    #         lines.append('800Vendedor:%s'%prod_line.get('salesman'))
-    #         lines.append('810')
-    #
-    #         event_result = do_event('make_ticket', {'name': fp.name, 'lines': lines}, session_id=fp.session_id, printer_id=fp.name)
+    #         try:
+    #             event_result = do_event('get_status', {'name': fp.name},
+    #                  session_id=fp.session_id, printer_id=fp.name)
+    #         except DenialService, m:
+    #             raise osv.except_osv(_('Connectivity Error'), m)
     #         r[fp.id] = event_result.pop() if event_result else False
     #     return r
+
+    def make_non_fiscal_ticket(self, cr, uid, ids, ticket={}, context=None):
+        r = {}
+        for fp in self.browse(cr, uid, ids):
+            lines = [
+                '80$%s'%ticket.get('partner').get('name'),#NOMBRE RAZON SOCIAL
+                '800%s'%ticket.get('partner').get('document_number'),#RUC_CEDULA
+                '800%s'%ticket.get('partner').get('street', ''),
+                '800%s'%ticket.get('partner').get('city', ''),
+                '800%s'%ticket.get('partner').get('country', ''),
+                '800-------------------------',
+            ]
+            total = 0
+
+            for prod_line in ticket.get('lines'):
+                price = prod_line.get('unit_price') * prod_line.get('quantity')
+                price = price - (price * prod_line.get('discount')/100)
+                total += price
+                lines.append('80*%s[%s] B/. %s'%(prod_line.get('item_name'), prod_line.get('unit_price'), prod_line.get('quantity')))
+                if prod_line.get('discount', False):
+                    lines.append('800Descuento:%s'%prod_line.get('discount'))
+            lines.append('800-------------------------')
+            lines.append('80*Total B/. %s'%total)
+            lines.append('800Vendedor:%s'%prod_line.get('salesman'))
+            lines.append('810')
+
+            r[fp.id] = self.pool.get('fpoc.event').create(cr, uid, {'name': 'make_ticket', 'data': simplejson.dumps(lines), 'printer_id': fp.id}, context=context)
+        return r
     
     def make_fiscal_ticket(self, cr, uid, ids, ticket={}, context=None):
         def format_value(value):
@@ -328,9 +261,8 @@ class fiscal_printer(osv.osv):
                 lines.append("1%s" % pay[0])
             else:
                 lines.append("101")
-            
-            event_result = do_event('make_ticket', {'name': fp.name, 'lines': lines}, session_id=fp.session_id, printer_id=fp.name)
-            r[fp.id] = event_result
+
+            r[fp.id] = self.pool.get('fpoc.event').create(cr, uid, {'name': 'make_ticket', 'data': simplejson.dumps(lines), 'printer_id': fp.id}, context=context)
         return r
     
     def make_fiscal_ticket_refund(self, cr, uid, ids, ticket={}, context=None):
@@ -400,8 +332,8 @@ class fiscal_printer(osv.osv):
             else:
                 lines.append("101")
             
-            event_result = do_event('make_ticket', {'name': fp.name, 'lines': lines}, session_id=fp.session_id, printer_id=fp.name)
-            r[fp.id] = event_result.pop() if event_result else False
+            r[fp.id] = self.pool.get('fpoc.event').create(cr, uid, {'name': 'make_ticket', 'data': simplejson.dumps(lines), 'printer_id': fp.id}, context=context)
+
         return r
     
 fiscal_printer()
@@ -411,6 +343,17 @@ class fpoc_journal(osv.osv):
 
     _columns = {
         'fiscal_printer_code': fields.char('Fiscal Printer Code'),
+    }
+
+class fpoc_event(osv.osv):
+    _name = 'fpoc.event'
+
+    _columns = {
+        'name': fields.char('Event Name', size=16, required=True),
+        'data': fields.text('Data', required=True),
+        'response': fields.text('Response'),
+        'consumed': fields.boolean('Consumed'),
+        'printer_id': fields.many2one('fpoc.fiscal_printer', 'Printer'),
     }
 
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

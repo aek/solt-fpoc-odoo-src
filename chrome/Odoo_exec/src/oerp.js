@@ -20,7 +20,6 @@ oerpSession = function(server, session_id) {
     this.server = server;
     this.session_id = session_id;
     this.id = uniqueId('p');
-    this.spools = {};
 
     this.onlogout = null;
     this.onmessage = null;
@@ -30,58 +29,40 @@ oerpSession = function(server, session_id) {
     
     this.lastOperationStatus = 'No info';
 
-
     //
     // Init general server event listener.
     //
     this.set_server_events = function(params, event_function_map, data, return_callback, callback, retry) {
         var self = this;
-        var url = this.server + "/fp/spool?" + params;
-
-        console.log("Create spool ", params);
-
-        if (url in self.spools) {
-            console.log("Repeated spool. Ignore it.");
-            if (callback) callback(self.spools[url]);
-            return;
-        }
-
-        var receptor = new EventSource(url);
-
-        self.spools[receptor.url] = receptor;
-
-        receptor.onopen = function(ev) {
-            self.dispatchEvent({type: 'spool_open', 'event': ev});
-        };
-        receptor.onerror = function(ev) {
-            var url = ev.srcElement.url;
-            if(self.spools[url] != undefined){
-              self.spools[url].close();
-              delete self.spools[url];
-            }
-            self.dispatchEvent({type: 'spool_error', 'event': ev});
-            self.dispatchEvent({type: 'spool_close', 'event': ev});
-            if (retry) retry(event_function_map, callback);
-        };
-        receptor.onmessage = function(ev) {
-            self.dispatchEvent({type: 'spool_message', 'event': ev});
-        };
-
-        receptor.addEventListener('close', function() {
-            //debugger;
-        } , false);
+        console.log("Polling for print task ", params);
 
         var _callback = function() {
-            if (callback) callback(receptor.url);
+            if (callback) callback();
         };
+
+        self._call('fpoc.event', 'search',[
+            [['printer_id.session_id','=',self.session_id], ['consumed','=',false]]
+        ], {}, function(e, fps) {
+            if (e != 'error') {
+                if(fps.length > 0){
+                    async.each(fps, function(fp, __callback) {
+                        self._call('fpoc.event', 'read',[ fp, []], {}, function(e, event_data) {
+                            self.dispatchEvent({type: event_data.name, event_id: fp, data: event_data});
+                            console.log(event_data);
+                            //self._call('fpoc.event', 'write',[ fp, {'consumed': true}], {}, function(e, r) { __callback(); });
+                            __callback();//quitar cuando se haga write pa dejar el del write
+                        });
+                    }, _callback);
+                }
+            }
+            retry();
+        });
 
         async.each(takeKeys(event_function_map), function(event_key, __callback) {
                 var event_callback = function(ev) {
-                    var event_data = JSON.parse(ev.data);
-                    var local_data = data;
-                    event_function_map[ev.type](self, ev.lastEventId, event_data, local_data, return_callback);
+                    event_function_map[ev.type](self, ev.event_id, ev.data, return_callback);
                 };
-                receptor.addEventListener(event_key, event_callback, false);
+                self.addListener(event_key, event_callback, false);
                 __callback();
             },
             _callback);
@@ -112,18 +93,6 @@ oerpSession = function(server, session_id) {
         } else {
             retry(event_function_map);
         }
-    };
-
-    //
-    // Clean event-set server
-    //
-    this.clean_server_events = function() {
-        //var self = this;
-        //for (i = 0; i < self.receptor.length; i++) {
-        //  self.receptor[i].close();
-        //};
-        //delete self.receptor;
-        //self.receptor = [];
     };
 
     //
@@ -279,7 +248,7 @@ oerpSession = function(server, session_id) {
                 callback(mess, result);
             }
         };
-        self.rpc("/fp/push", value, _callback);
+        self._call('fpoc.event', 'write', [ value.event_id, {'consumed': true, 'response': JSON.stringify(value.response)} ], {}, _callback);
     };
 
     //
@@ -335,54 +304,40 @@ oerpSession = function(server, session_id) {
             callback();
     };
     
-    this.update = function(callback) {
+    this.update = function(_callback) {
         var self = this;
 
         console.debug('[SES] Updating printers.');
-        // Take printers
-        var push_printers = function(keys, printers, _callback) {
-            if (session_id && keys.length && self.uid) {
-                self._call('fpoc.fiscal_printer', 'search',
-                        [ [['name','in',keys]] ], {}, function(e, fps) {
-                            if (e == 'error') {
-                                async.each(takeKeys(self.printers), function(key, __callback) {
-                                    self.printers[key].is_connected = false;
-                                    __callback();
-                                });
-                            } else {
-                                var d = new Date();
-                                async.each(fps, function(fp, __callback) {
-                                    self._call('fpoc.fiscal_printer', 'write',
-                                        [ fp, {
-                                            'session_id':self.session_id,
-                                            'lastUpdate': d,
-                                        } ], {}, function(e, r) { __callback(); });
-                                }, _callback);
+        if (session_id && printer_id_tpl && self.uid) {
+            self._call('fpoc.fiscal_printer', 'search',[ [['name','=',printer_id_tpl]] ], {}, function(e, fps) {
+                if (e != 'error') {
+                    if(fps.length > 0){
+                        var d = new Date();
+                        self._call('fpoc.fiscal_printer', 'write',
+                            [ fps, {
+                                'session_id':self.session_id,
+                                'lastUpdate': d,
+                            } ], {}, function(e1, r) { _callback(); });
+                    } else{
+                        self._call('fpoc.disconnected', 'search', [ [['name','=',printer_id_tpl]] ], {}, function(e1, fpd) {
+                            if (e1 != 'error') {
+                                if(fpd.length == 0){
+                                    self._call('fpoc.disconnected', 'create',[{
+                                        'name': printer_id_tpl,
+                                        'user_id': self.uid,
+                                        'session_id':self.session_id,
+                                    }], {}, function(e2, r) { _callback(); });
+                                }
                             }
                         });
-            } else {
-                _callback();
-            }
-        };
-
-        var final_callback = function(res) {
-            callback();
-        };
-
-        var publish_printers = function(printers) {
-            self.printers = printers;
-            var keys = takeKeys(printers);
-            push_printers(keys, printers, function() {
-                async.each(keys, function(printer, __callback) {
-                    console.debug("[SES] Printers to publish:", printer);
-                    self.add_printer(printers[printer], printer_server_events, __callback);
-                }, final_callback);
+                    }
+                } else{
+                    _callback();
+                }
             });
+        } else {
+            _callback();
         };
-
-        self.clean_printers(function(){
-            query_local_printers( publish_printers, self.onchange );
-        });
     };
 };
 

@@ -9,38 +9,30 @@ chrome.system.network.getNetworkInterfaces(function(details){
 // Control server events.
 //
 control_server_events = {
-    'list_printers': function(session, event_id, event_data, printers, callback) {
+    'list_printers': function(session, event_id, event_data, callback) {
         console.debug("[EVENT] Query local printers.");
         var tmpPrinters = [];
         var key = printer_id_tpl;
-        tmpPrinters.push({
-            'uid': session.uid,
-            'sid': session.session_id,
-            'name': key,
-            'fiscalStatus': true,
-            'printerStatus': true,
-        });
+        tmpPrinters.push();
         console.log(key);
         console.log(printers);
-        session.send({'event_id': event_id,'printer_id': key, 'printers': tmpPrinters}, callback);
+        session.send({'event_id': event_id, 'response': response}, callback);
     },
-    'make_ticket': function(session, event_id, event_data, printers, callback) {
+    'make_ticket': function(session, event_id, event_data, callback) {
         console.debug("[EVENT] Make Ticket.");
-        var printer_id = event_data.name;
-        chrome.runtime.sendNativeMessage('solt.native.odoo.exec', {'action': 'make_ticket', 'data': event_data}, function(response) {
+        chrome.runtime.sendNativeMessage('solt.native.odoo.exec', {'action': 'make_ticket', 'data': {'lines': JSON.parse(event_data.data)}}, function(response) {
             console.log("Received " + JSON.stringify(response));
-            session.send({'event_id': event_id, 'printer_id': printer_id, 'response': response}, callback);
+            session.send({'event_id': event_id, 'response': response}, callback);
         });
     },
-    'make_report': function(session, event_id, event_data, printers, callback) {
+    'make_report': function(session, event_id, event_data, callback) {
         console.debug("[EVENT] Make Report.");
-        var printer_id = event_data.name;
-        chrome.runtime.sendNativeMessage('solt.native.odoo.exec', {'action': 'make_report', 'data': event_data}, function(response) {
+        chrome.runtime.sendNativeMessage('solt.native.odoo.exec', {'action': 'make_report', 'data': { 'type': event_data.data}}, function(response) {
             console.log("Received " + JSON.stringify(response));
-            session.send({'event_id': event_id, 'printer_id': printer_id, 'response': response}, callback);
+            session.send({'event_id': event_id, 'response': response}, callback);
         });
     },
-    'get_status': function(session, event_id, event_data, printers, callback) {
+    'get_status': function(session, event_id, event_data, callback) {
         console.debug("[EVENT] Get Status.");
         var printer_id = event_data.name;
         
@@ -48,8 +40,7 @@ control_server_events = {
           console.log("Received " + JSON.stringify(response));
         });
         
-        var response = {'event_id': event_id, 'printer_id': printer_id, 'strPrinterStatus': 'active', 'strFiscalStatus': 'active'};
-        session.send(response,callback);
+        session.send({'event_id': event_id, 'response': response}, callback);
     },
 };
 
