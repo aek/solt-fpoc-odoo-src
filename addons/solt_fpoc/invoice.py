@@ -1,37 +1,15 @@
 # -*- coding: utf-8 -*-
-##############################################################################
-#
-#    fiscal_printer
-#    Copyright (C) 2014 No author.
-#    No email
-#
-#    This program is free software: you can redistribute it and/or modify
-#    it under the terms of the GNU Affero General Public License as
-#    published by the Free Software Foundation, either version 3 of the
-#    License, or (at your option) any later version.
-#
-#    This program is distributed in the hope that it will be useful,
-#    but WITHOUT ANY WARRANTY; without even the implied warranty of
-#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#    GNU Affero General Public License for more details.
-#
-#    You should have received a copy of the GNU Affero General Public License
-#    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-#
-##############################################################################
 
+import logging
+import simplejson
+import time
 
-import re
-from openerp import netsvc
 from openerp.osv import osv, fields
 from openerp.tools.translate import _
-import logging
-import json
 
 _logger = logging.getLogger(__name__)
 
 class fpoc_invoice(osv.osv):
-    """"""
     _name = 'account.invoice'
     _inherit = [ 'account.invoice', 'fpoc.user']
     
@@ -90,23 +68,30 @@ class fpoc_invoice(osv.osv):
                         "discount": line.discount,
                         "tax": str(tax),
                     })
-                r = inv.make_fiscal_ticket(ticket)[inv.id]
-                if r:
-                    _logger.info('Respuesta de la Impresora: %s'%str(r))
-                    if context.get('fiscal', False) and r[0].get('response',{}).get('id', False):
-                        inv_count = self.search(cr, uid, [('internal_number', '=', r[0].get('response',{}).get('id'))], count=True)
-                        if inv_count:
-                            raise osv.except_osv(_('Validation'),_('Error: The invoice was not printed. Check if the fiscal Printer is connected'))
-                        inv.write({'internal_number': r[0]['response']['id'], 'fiscal_status': 'print'})
-                    elif context.get('fiscal_refund', False):
-                        inv.write({'fiscal_status': 'refund'})
-        if r and 'error' not in r:
-            return True
-        else:
-            if r:
-                raise osv.except_osv(_('Validation'),_('Error: %s') % r[0]['response'])
+                event_id = False
+                with self.pool.cursor() as new_cr:
+                    event_id = self.make_fiscal_ticket(new_cr, uid, inv.id, ticket, context=context)[inv.id]
+                time.sleep(5)
+                response = {}
+                with self.pool.cursor() as new_cr:
+                    event_id = self.pool.get('fpoc.event').browse(new_cr, uid, event_id, context=context)
+                    if event_id.response:
+                        response = simplejson.loads(event_id.response)
+                        _logger.info('Respuesta de la Impresora: %s'%unicode(event_id.response).encode('utf-8'))
+                if context.get('fiscal', False) and response.get('id', False):
+                    inv_count = self.search(cr, uid, [('internal_number', '=', response.get('id'))], count=True)
+                    if inv_count:
+                        raise osv.except_osv(_('Validation'),_('Error: The invoice was not printed. Check if the fiscal Printer is connected'))
+                    inv.write({'internal_number': response['id'], 'fiscal_status': 'print'})
+                elif context.get('fiscal_refund', False):
+                    inv.write({'fiscal_status': 'refund'})
+            if response and 'Error' not in response.get('Retorno:', '') and 'error' not in response:
+                return True
             else:
-                raise osv.except_osv(_('Validation'),_('Error: Printer not Connected'))
+                if response:
+                    raise osv.except_osv(_('Validation'), response.get('Retorno:'))
+                else:
+                    raise osv.except_osv(_('Validation'),_('Error: Printer not Connected'))
 
     def _get_default_printer(self, cr, uid, context=None):
         res = self.pool.get('fpoc.fiscal_printer').search(cr, uid, [('printerStatus', '=', 'active')], context=context)

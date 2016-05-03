@@ -61,6 +61,7 @@ function login(callback) {
                 server: session.server,
                 session_id: session.session_id
             });
+            session.update(function(){});
             session.init_server_events(control_server_events);
         });
         session.addListener('logout', function(s) {

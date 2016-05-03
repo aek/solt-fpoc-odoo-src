@@ -34,7 +34,7 @@ oerpSession = function(server, session_id) {
     //
     this.set_server_events = function(params, event_function_map, data, return_callback, callback, retry) {
         var self = this;
-        console.log("Polling for print task ", params);
+        //console.log("Polling for print task ", params);
 
         var _callback = function() {
             if (callback) callback();
@@ -308,7 +308,7 @@ oerpSession = function(server, session_id) {
         var self = this;
 
         console.debug('[SES] Updating printers.');
-        if (session_id && printer_id_tpl && self.uid) {
+        if (self.session_id && printer_id_tpl && self.uid) {
             self._call('fpoc.fiscal_printer', 'search',[ [['name','=',printer_id_tpl]] ], {}, function(e, fps) {
                 if (e != 'error') {
                     if(fps.length > 0){
