@@ -213,9 +213,9 @@ class fiscal_printer(osv.osv):
             return ''.join(value)
         r = {}
         for fp in self.browse(cr, uid, ids):
-            lines = []
-            if ticket.get('partner').get('document_number'):
-                lines.append('jR%s'%ticket.get('partner').get('document_number'))#RUC_CEDULA
+            lines = [
+                'jR%s'%ticket.get('partner').get('document_number', ''),#RUC_CEDULA
+            ]
             jindex = 2
             for elem in (ticket.get('partner').get('name'), ticket.get('partner').get('street', ''), ticket.get('partner').get('city', ''), ticket.get('partner').get('country', '')):
                 head = elem
@@ -280,9 +280,9 @@ class fiscal_printer(osv.osv):
             return ''.join(value)
         r = {}
         for fp in self.browse(cr, uid, ids):
-            lines = []
-            if ticket.get('partner').get('document_number'):
-                lines.append('jR%s' % ticket.get('partner').get('document_number'))  # RUC_CEDULA
+            lines = [
+                'jR%s'%ticket.get('partner').get('document_number'),#RUC_CEDULA
+            ]
             jindex = 2
             for elem in (
                 ticket.get('partner').get('name'), ticket.get('partner').get('street', ''),
