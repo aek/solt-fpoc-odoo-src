@@ -78,11 +78,12 @@ class fpoc_invoice(osv.osv):
                     count+=1
                     time.sleep(5)
                     with self.pool.cursor() as new_cr:
-                        event_id = self.pool.get('fpoc.event').browse(new_cr, uid, event_id, context=context)
-                        if event_id.response:
-                            response = simplejson.loads(event_id.response)
-                            _logger.info('Respuesta de la Impresora: %s'%unicode(event_id.response).encode('utf-8'))
+                        evt_id = self.pool.get('fpoc.event').browse(new_cr, uid, event_id, context=context)
+                        if evt_id.response:
+                            response = simplejson.loads(evt_id.response)
+                            _logger.info('Respuesta de la Impresora: %s'%unicode(evt_id.response).encode('utf-8'))
                             break
+
                 if context.get('fiscal', False) and response.get('id', False):
                     inv_count = self.search(cr, uid, [('internal_number', '=', response.get('id'))], count=True)
                     if inv_count:
