@@ -48,7 +48,7 @@ class fpoc_invoice(osv.osv):
                         "street": partner_id.street or '',
                         "city": partner_id.city or '',
                         "country": partner_id.country_id.name or '',
-                        "document_number": partner_id.curp or '',
+                        "document_number": partner_id.curp or '---',
                     },
                     'internal_number': inv.internal_number, 
                     "lines": [ ],
