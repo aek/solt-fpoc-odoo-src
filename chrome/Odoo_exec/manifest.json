@@ -13,8 +13,9 @@
   "app": {
     "background": {
       "scripts": [
+          "lib/jquery-2.1.4.min.js",
           "src/cevents.js",
-			    "src/async.js",
+          "src/async.js",
           "src/oerp.js",
           "src/tools.js",
           "src/sevents.js",

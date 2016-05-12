@@ -28,7 +28,7 @@ oerpSession = function(server, session_id) {
     this.onchange = null;
     
     this.lastOperationStatus = 'No info';
-
+    this.event_tasks = {}
     //
     // Init general server event listener.
     //
@@ -40,24 +40,6 @@ oerpSession = function(server, session_id) {
             if (callback) callback();
         };
 
-        self._call('fpoc.event', 'search',[
-            [['printer_id.session_id','=',self.session_id], ['consumed','=',false]]
-        ], {}, function(e, fps) {
-            if (e != 'error') {
-                if(fps.length > 0){
-                    async.each(fps, function(fp, __callback) {
-                        self._call('fpoc.event', 'read',[ fp, []], {}, function(e, event_data) {
-                            self.dispatchEvent({type: event_data.name, event_id: fp, data: event_data});
-                            console.log(event_data);
-                            //self._call('fpoc.event', 'write',[ fp, {'consumed': true}], {}, function(e, r) { __callback(); });
-                            __callback();//quitar cuando se haga write pa dejar el del write
-                        });
-                    }, _callback);
-                }
-            }
-            retry();
-        });
-
         async.each(takeKeys(event_function_map), function(event_key, __callback) {
                 var event_callback = function(ev) {
                     event_function_map[ev.type](self, ev.event_id, ev.data, return_callback);
@@ -66,6 +48,33 @@ oerpSession = function(server, session_id) {
                 __callback();
             },
             _callback);
+        function find_events(){
+            self._call('fpoc.event', 'search',[
+                [['printer_id.session_id','=',self.session_id], ['consumed','=',false]]
+            ], {}, function(e, fps) {
+                if (e != 'error') {
+                    fps_def = []
+                    if(fps.length > 0){
+                        async.each(fps, function(fp) {
+                            if(self.event_tasks[fp] === undefined){
+                                self.event_tasks[fp] = true;
+                                deff = self._call('fpoc.event', 'read',[ fp, []], {}, function(e, event_data) {
+                                    self.dispatchEvent({type: event_data.name, event_id: fp, data: event_data});
+                                    console.log(event_data);
+                                });
+                                fps_def.push(deff);
+                            }
+                        });
+                    }
+                    $.when(fps_def).done(function(){
+                        setTimeout(find_events, 3000);
+                    });
+                } else {
+                    setTimeout(find_events, 3000);
+                }
+            });
+        }
+        setTimeout(find_events, 3000);
     };
 
     //
@@ -108,7 +117,67 @@ oerpSession = function(server, session_id) {
     // RPC wrapper
     //
     this.rpc = function(url, params, callback) {
-        var xhr = new XMLHttpRequest();
+        var self = this;
+        var data = {
+            jsonrpc: "2.0",
+            method: "call",
+            params: params,
+            id: Math.floor(Math.random() * 1000 * 1000 * 1000)
+        };
+        xhr = $.ajax({
+            url: this.server + url,
+            dataType: 'json',
+            type: 'POST',
+            data: JSON.stringify(data),
+            contentType: 'application/json',
+            timeout: 10000,
+            xhrFields: {
+                withCredentials: true
+            }
+        });
+
+        var result = xhr.pipe(function(result) {
+            if (result.error !== undefined) {
+                //console.error("Server application error", result.error);
+                self.dispatchEvent({type: 'error', 'event': $.Event()});
+                callback("error", null);
+                return $.Deferred().reject("server", result.error);
+            } else {
+                return result.result;
+            }
+        }, function() {
+            //console.error("JsonRPC communication error", _.toArray(arguments));
+            var def = $.Deferred();
+            self.dispatchEvent({type: 'error', 'event': $.Event()});
+            callback("error", null);
+            return def.reject.apply(def, ["communication"].concat(Array.prototype.slice.call(arguments)));
+        });
+        // FIXME: jsonp?
+        result.abort = function () { xhr.abort && xhr.abort(); };
+
+        result.then(function (result) {
+            callback("done", result);
+            return result;
+        }, function(type, error, textStatus, errorThrown) {
+            if (type === "server") {
+                if (error.code === 100) {
+                    self.session_id = false;
+                }
+                return $.Deferred().reject(error, $.Event());
+            } else {
+                var nerror = {
+                    code: -32098,
+                    message: "XmlHttpRequestError " + errorThrown,
+                    data: {type: "xhr"+textStatus, debug: error.responseText, objects: [error, errorThrown] }
+                };
+                return $.Deferred().reject(nerror, $.Event());
+            }
+            callback("error", null);
+        });
+        return result;
+
+
+        /*var xhr = new XMLHttpRequest();
         var self=this;
         var args = "?jsonp=_&id="+this.id;
         //if (self.session_id) {
@@ -146,13 +215,13 @@ oerpSession = function(server, session_id) {
                 callback("done", response.result);
             }
         };
-        xhr.open("GET", this.server + url + args, true);
+        xhr.open("GET", this.server + url + args, false);
         xhr.timeout = 10000;
         xhr.withCredentials = true;
         xhr.send();
         if (self.onmessage) {
             self.onmessage("out", [url, args]);
-        }
+        }*/
     };
 
     //
@@ -288,7 +357,7 @@ oerpSession = function(server, session_id) {
 
     this._call = function(model, method, args, kwargs, callback) {
         var self = this;
-        self.rpc("/web/dataset/call_kw", {
+        return self.rpc("/web/dataset/call_kw", {
             model: model,
             method: method,
             args: args,
