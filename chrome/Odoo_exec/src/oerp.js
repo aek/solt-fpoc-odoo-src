@@ -11,6 +11,8 @@ uniqueId = function(prefix) {
   return prefix ? prefix + id : id;
 };
 
+event_tasks = {}
+
 //
 // Class to create a session associated to a server.
 //
@@ -28,7 +30,7 @@ oerpSession = function(server, session_id) {
     this.onchange = null;
     
     this.lastOperationStatus = 'No info';
-    this.event_tasks = {}
+
     //
     // Init general server event listener.
     //
@@ -48,31 +50,34 @@ oerpSession = function(server, session_id) {
                 __callback();
             },
             _callback);
+
         function find_events(){
-            self._call('fpoc.event', 'search',[
-                [['printer_id.session_id','=',self.session_id], ['consumed','=',false]]
-            ], {}, function(e, fps) {
-                if (e != 'error') {
-                    fps_def = []
-                    if(fps.length > 0){
-                        async.each(fps, function(fp) {
-                            if(self.event_tasks[fp] === undefined){
-                                self.event_tasks[fp] = true;
-                                deff = self._call('fpoc.event', 'read',[ fp, []], {}, function(e, event_data) {
-                                    self.dispatchEvent({type: event_data.name, event_id: fp, data: event_data});
-                                    console.log(event_data);
-                                });
-                                fps_def.push(deff);
-                            }
+            if(self.session_id){
+                self._call('fpoc.event', 'search',[
+                    [['printer_id.session_id','=',self.session_id], ['consumed','=',false]]
+                ], {}, function(e, fps) {
+                    if (e != 'error') {
+                        fps_def = []
+                        if(fps.length > 0){
+                            async.each(fps, function(fp) {
+                                if(event_tasks[fp] === undefined){
+                                    event_tasks[fp] = true;
+                                    deff = self._call('fpoc.event', 'read',[ fp, []], {}, function(e, event_data) {
+                                        self.dispatchEvent({type: event_data.name, event_id: fp, data: event_data});
+                                        console.log(event_data);
+                                    });
+                                    fps_def.push(deff);
+                                }
+                            });
+                        }
+                        $.when(fps_def).done(function(){
+                            setTimeout(find_events, 3000);
                         });
-                    }
-                    $.when(fps_def).done(function(){
+                    } else {
                         setTimeout(find_events, 3000);
-                    });
-                } else {
-                    setTimeout(find_events, 3000);
-                }
-            });
+                    }
+                });
+            }
         }
         setTimeout(find_events, 3000);
     };
@@ -275,9 +280,8 @@ oerpSession = function(server, session_id) {
                 self.uid = result.uid;
                 self.session_id = result.session_id;
                 self.username = login;
-                if (old_uid != self.uid && self.uid !== null) {
-                    self.dispatchEvent('login');
-                }
+                self.dispatchEvent('login');
+
                 if (self.uid === null) {
                     self.dispatchEvent('login_error');
                 }
